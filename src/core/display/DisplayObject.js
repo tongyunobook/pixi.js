@@ -337,6 +337,13 @@ DisplayObject.prototype.updateTransform = function ()
 DisplayObject.prototype.displayObjectUpdateTransform = DisplayObject.prototype.updateTransform;
 
 /**
+ * 添加一个事件监听器
+ */
+DisplayObject.prototype.addEventListener = function() {
+    this.interactive = true;
+    this.on.apply(this, arguments);
+}
+/**
  *
  *
  * Retrieves the bounds of the displayObject as a rectangle object
@@ -348,6 +355,36 @@ DisplayObject.prototype.getBounds = function (matrix) // jshint unused:false
 {
     return math.Rectangle.EMPTY;
 };
+
+/**
+ * Hit test
+ * @param dis {PIXI.DisplayObject}
+ * @return {boolean}
+ */
+DisplayObject.prototype.hitTest = function(dis) {
+    var rect1 = this.getBounds();
+    var rect2 = dis.getBounds();
+    //get the maximum x,y between rect1 and rect2.
+    var x = Math.max(rect1.x, rect2.x);
+    var y = Math.max(rect1.y, rect2.y);
+    //calculateing width and height of intersection area.
+    var w = Math.min(rect1.x + rect1.width, rect2.x + rect2.width) - x;
+    var h = Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - y;
+    if (h <= 0 || w <= 0) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Hit test point
+ * @param p
+ * @returns {boolean}
+ */
+DisplayObject.prototype.hitTestPoint = function(p) {
+    var g = this.getBounds();
+    return g.contains(p.x, p.y);
+}
 
 /**
  * Retrieves the local bounds of the displayObject as a rectangle object

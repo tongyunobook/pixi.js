@@ -95,34 +95,6 @@ var utils = module.exports = {
      */
     sayHello: function (type)
     {
-        if (utils._saidHello)
-        {
-            return;
-        }
-
-        if (navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
-        {
-            var args = [
-                '\n %c %c %c Pixi.js ' + CONST.VERSION + ' - ✰ ' + type + ' ✰  %c ' + ' %c ' + ' http://www.pixijs.com/  %c %c ♥%c♥%c♥ \n\n',
-                'background: #ff66a5; padding:5px 0;',
-                'background: #ff66a5; padding:5px 0;',
-                'color: #ff66a5; background: #030307; padding:5px 0;',
-                'background: #ff66a5; padding:5px 0;',
-                'background: #ffc3dc; padding:5px 0;',
-                'background: #ff66a5; padding:5px 0;',
-                'color: #ff2424; background: #fff; padding:5px 0;',
-                'color: #ff2424; background: #fff; padding:5px 0;',
-                'color: #ff2424; background: #fff; padding:5px 0;'
-            ];
-
-            window.console.log.apply(console, args); //jshint ignore:line
-        }
-        else if (window.console)
-        {
-            window.console.log('Pixi.js ' + CONST.VERSION + ' - ' + type + ' - http://www.pixijs.com/'); //jshint ignore:line
-        }
-
-        utils._saidHello = true;
     },
 
     /**

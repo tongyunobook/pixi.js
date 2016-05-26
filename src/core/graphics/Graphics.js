@@ -1003,7 +1003,8 @@ Graphics.prototype.drawShape = function (shape)
 
     if (data.type === CONST.SHAPES.POLY)
     {
-        data.shape.closed = data.shape.closed || this.filling;
+        //修改成 图形关闭 和 填充的时候变为closed
+        data.shape.closed = data.shape.closed && this.filling;data.shape.closed = data.shape.closed || this.filling;
         this.currentPath = data;
     }
 
