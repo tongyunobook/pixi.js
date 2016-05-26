@@ -543,3 +543,115 @@ DisplayObject.prototype.destroy = function ()
     this.worldTransform = null;
     this.filterArea = null;
 };
+
+/**
+ * 是否有eventType方法
+ * @param eventType 事件类型
+ */
+DisplayObject.prototype.has = EventEmitter.prototype.hasEventListener = function(eventType) {
+    var evt = prefix ? prefix + eventType : eventType;
+    if (!this._events || !this._events[evt]) {
+        return false;
+    }
+    return true;
+}
+
+//准备覆盖方法on
+DisplayObject.prototype.$on = DisplayObject.prototype.on
+
+EventEmitter.prototype.on = function on(event, fn, context) {
+    if (event === 'mousedown') {
+        this.$on('mousedown', fn, context);
+        this.$on('touchstart', fn, context);
+        return this;
+    } else if (event === 'mousemove') {
+        this.$on('mousemove', fn, context);
+        this.$on('touchmove', fn, context);
+        return this;
+    } else if (event === 'mouseup') {
+        this.$on('mouseup', fn, context);
+        this.$on('touchend', fn, context);
+        return this;
+    } else if (event === 'click') {
+        this.$on('click', fn, context);
+        this.$on('tap', fn, context);
+        return this;
+    } else if (event === 'mouseupoutside') {
+        this.$on('mouseupoutside', fn, context);
+        this.$on('touchendoutside', fn, context);
+        return this;
+    }
+    this.$on(event, fn, context);
+}
+
+DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
+    var evt = prefix ? prefix + event : event;
+    if (!this._events || !this._events[evt]) return this;
+    var listeners = this._events[evt]
+        , events = [];
+
+    if (fn) {
+        if (listeners.fn) {
+            if (
+                listeners.fn !== fn
+                || (once && !listeners.once)
+                || (context && listeners.context !== context)
+            ) {
+                events.push(listeners);
+            }
+        } else {
+            for (var i = 0, length = listeners.length; i < length; i++) {
+                if (
+                    listeners[i].fn !== fn
+                    || (once && !listeners[i].once)
+                    || (context && listeners[i].context !== context)
+                ) {
+                    events.push(listeners[i]);
+                }
+            }
+        }
+    } else {
+        //添加return，避免全部被删除
+        return;
+    }
+
+    //
+    // Reset the array, or remove it completely if we have no more listeners.
+    //
+    if (events.length) {
+        this._events[evt] = events.length === 1 ? events[0] : events;
+    } else {
+        delete this._events[evt];
+    }
+
+    return this;
+}
+
+DisplayObject.prototype.removeEventListener = DisplayObject.prototype.removeListener = function removeListener(event, fn, context, once) {
+    if (event === 'mousedown') {
+        this.$removeListener('mousedown', fn, context, once);
+        this.$removeListener('touchstart', fn, context, once);
+        return;
+    } else if (event === 'mousemove') {
+        this.$removeListener('mousemove', fn, context, once);
+        this.$removeListener('touchmove', fn, context, once);
+        return;
+    } else if (event === 'mouseup') {
+        this.$removeListener('mouseup', fn, context, once);
+        this.$removeListener('touchend', fn, context, once);
+        return;
+    } else if (event === 'click') {
+        this.$removeListener('click', fn, context, once);
+        this.$removeListener('tap', fn, context, once);
+        return;
+    } else if (event === 'mouseupoutside') {
+        this.$removeListener('mouseupoutside', fn, context, once);
+        this.$removeListener('touchendoutside', fn, context, once);
+        return;
+    }
+    this.$removeListener(event, fn, context, once);
+}
+
+
+
+
