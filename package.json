@@ -30,9 +30,13 @@
     "README.md"
   ],
   "dependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.3.0",
     "bit-twiddle": "^1.0.2",
     "earcut": "^2.0.7",
     "eventemitter3": "^1.1.1",
+    "glslify": "^5.0.2",
     "ismobilejs": "git+https://github.com/kaimallea/isMobile.git",
     "object-assign": "^4.0.1",
     "pixi-gl-core": "git+https://github.com/GoodBoyDigital/pixi-gl-core.git",
