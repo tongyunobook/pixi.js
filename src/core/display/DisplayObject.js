@@ -3,6 +3,7 @@ var math = require('../math'),
     Transform = require('./Transform'),
     _tempDisplayObjectParent = {worldTransform:new math.Matrix(), worldAlpha:1, children:[]};
 
+var prefix = typeof Object.create !== 'function' ? '~' : false;
 
 /**
  * The base class for all objects that are rendered on the screen.
@@ -557,9 +558,10 @@ DisplayObject.prototype.has = EventEmitter.prototype.hasEventListener = function
 }
 
 //准备覆盖方法on
-DisplayObject.prototype.$on = DisplayObject.prototype.on
+DisplayObject.prototype.$on = EventEmitter.prototype.on;
 
-EventEmitter.prototype.on = function on(event, fn, context) {
+
+DisplayObject.prototype.on = function on(event, fn, context) {
     if (event === 'mousedown') {
         this.$on('mousedown', fn, context);
         this.$on('touchstart', fn, context);
@@ -581,7 +583,7 @@ EventEmitter.prototype.on = function on(event, fn, context) {
         this.$on('touchendoutside', fn, context);
         return this;
     }
-    this.$on(event, fn, context);
+    DisplayObject.prototype.$on(event, fn, context);
 }
 
 DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
@@ -651,7 +653,5 @@ DisplayObject.prototype.removeEventListener = DisplayObject.prototype.removeList
     }
     this.$removeListener(event, fn, context, once);
 }
-
-
 
 
