@@ -562,28 +562,28 @@ DisplayObject.prototype.$on = EventEmitter.prototype.on;
 
 
 DisplayObject.prototype.on = function on(event, fn, context) {
-    if (event === 'mousedown') {
+    if (event === TouchEvent.TOUCH_BEGIN) {
         this.$on('mousedown', fn, context);
         this.$on('touchstart', fn, context);
         return this;
-    } else if (event === 'mousemove') {
+    } else if (event === TouchEvent.TOUCH_MOVE) {
         this.$on('mousemove', fn, context);
         this.$on('touchmove', fn, context);
         return this;
-    } else if (event === 'mouseup') {
+    } else if (event === TouchEvent.TOUCH_END) {
         this.$on('mouseup', fn, context);
         this.$on('touchend', fn, context);
         return this;
-    } else if (event === 'click') {
+    } else if (event === TouchEvent.TAP) {
         this.$on('click', fn, context);
         this.$on('tap', fn, context);
         return this;
-    } else if (event === 'mouseupoutside') {
+    } else if (event === TouchEvent.TOUCH_END_OUDSIDE) {
         this.$on('mouseupoutside', fn, context);
         this.$on('touchendoutside', fn, context);
         return this;
     }
-    DisplayObject.prototype.$on(event, fn, context);
+    this.$on(event, fn, context);
 }
 
 DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
@@ -630,23 +630,23 @@ DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
 }
 
 DisplayObject.prototype.removeEventListener = DisplayObject.prototype.removeListener = function removeListener(event, fn, context, once) {
-    if (event === 'mousedown') {
+    if (event === TouchEvent.TOUCH_BEGIN) {
         this.$removeListener('mousedown', fn, context, once);
         this.$removeListener('touchstart', fn, context, once);
         return;
-    } else if (event === 'mousemove') {
+    } else if (event === TouchEvent.TOUCH_MOVE) {
         this.$removeListener('mousemove', fn, context, once);
         this.$removeListener('touchmove', fn, context, once);
         return;
-    } else if (event === 'mouseup') {
+    } else if (event === TouchEvent.TOUCH_END) {
         this.$removeListener('mouseup', fn, context, once);
         this.$removeListener('touchend', fn, context, once);
         return;
-    } else if (event === 'click') {
+    } else if (event === TouchEvent.TAP) {
         this.$removeListener('click', fn, context, once);
         this.$removeListener('tap', fn, context, once);
         return;
-    } else if (event === 'mouseupoutside') {
+    } else if (event === TouchEvent.TOUCH_END_OUDSIDE) {
         this.$removeListener('mouseupoutside', fn, context, once);
         this.$removeListener('touchendoutside', fn, context, once);
         return;
