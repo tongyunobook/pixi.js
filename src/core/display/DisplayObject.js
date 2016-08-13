@@ -358,6 +358,25 @@ DisplayObject.prototype.getBounds = function (matrix) // jshint unused:false
 };
 
 /**
+ * 获取根节点
+ */
+Object.defineProperty(DisplayObject.prototype, 'root', {
+    get : function() {
+        if (this._root_ === undefined) {
+            var _root = this;
+            while (true) {
+                if (_root.parent === null) {
+                    this._root_ = _root;
+                    break;
+                }
+                _root = _root.parent;
+            }
+        }
+        return this._root_;
+    }
+});
+
+/**
  * Hit test
  * @param dis {PIXI.DisplayObject}
  * @return {boolean}
