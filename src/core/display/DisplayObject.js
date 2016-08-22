@@ -329,9 +329,11 @@ Object.defineProperties(DisplayObject.prototype, {
  */
 DisplayObject.prototype.updateTransform = function ()
 {
-    this.transform =  this.parent.transform.updateChildTransform(this.transform);
-    // multiply the alphas..
-    this.worldAlpha = this.alpha * this.parent.worldAlpha;
+    if (this.parent.transform) {
+        this.transform =  this.parent.transform.updateChildTransform(this.transform);
+        // multiply the alphas..
+        this.worldAlpha = this.alpha * this.parent.worldAlpha;
+    }
 };
 
 // performance increase to avoid using call.. (10x faster)
@@ -578,7 +580,6 @@ DisplayObject.prototype.has = EventEmitter.prototype.hasEventListener = function
 
 //准备覆盖方法on
 DisplayObject.prototype.$on = EventEmitter.prototype.on;
-
 
 DisplayObject.prototype.on = function on(event, fn, context) {
     if (event === TouchEvent.TOUCH_BEGIN) {

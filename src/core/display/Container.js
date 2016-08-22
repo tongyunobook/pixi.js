@@ -100,6 +100,30 @@ Object.defineProperties(Container.prototype, {
  */
 Container.prototype.onChildrenChange = function () {};
 
+
+/**
+ * 添加孩子到容器当中，并且保持孩子的相对于全局坐标的位置
+ */
+Container.prototype.addChildWithSamePos = function(child) {
+    var p = this.toLocal({x:0, y:0}, child);
+    child.x = p.x;
+    child.y = p.y;
+    this.addChild(child);
+}
+
+/**
+ * 添加孩子到容器当中，并且保持孩子的相对于全局坐标的位置
+ * @param child
+ */
+Container.prototype.addChildAtWithSamePos = function(child, index) {
+    var p = this.toLocal({x:0, y:0}, child);
+    child.x = p.x;
+    child.y = p.y;
+    this.addChildAt(child, index);
+}
+
+
+
 /**
  * Adds a child to the container.
  *
