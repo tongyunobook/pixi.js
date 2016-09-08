@@ -375,6 +375,10 @@ Object.defineProperty(DisplayObject.prototype, 'root', {
             }
         }
         return this._root_;
+    },
+
+    set : function(value) {
+        this._root_ = value;
     }
 });
 
