@@ -124,6 +124,24 @@ Rectangle.prototype.intersection = function(rectangle) {
 }
 
 /**
+ * 两个矩形是否相交
+ * @param rectangle
+ * @returns {boolean}
+ */
+Rectangle.prototype.intersect = function(rectangle) {
+    var topX = Math.max(this.x, rectangle.x);
+    var topY = Math.max(this.y, rectangle.y);
+
+    var bottomX = Math.min(this.x + this.width, rectangle.x + rectangle.width);
+    var bottomY = Math.min(this.y + this.height, rectangle.y + rectangle.height);
+
+    var width = bottomX - topX;
+    var height = bottomY - topY;
+
+    return width >= 0 && height >= 0;
+}
+
+/**
  * Checks whether the x and y coordinates given are contained within this Rectangle
  *
  * @param x {number} The X coordinate of the point to test
