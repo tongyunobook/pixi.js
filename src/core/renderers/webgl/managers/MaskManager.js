@@ -37,7 +37,7 @@ MaskManager.prototype.pushMask = function (target, maskData)
     else
     {
        // console.log( maskData.graphicsData[0].shape.type)
-        if(this.enableScissor && !this.scissor && !this.renderer.stencilManager.stencilMaskStack.length && maskData.graphicsData[0].shape.type === 1)
+        if(this.enableScissor && !this.scissor && !this.renderer.stencilManager.stencilMaskStack.length && maskData.graphicsData[0] && maskData.graphicsData[0].shape.type === 1)
         {
             var matrix = maskData.worldTransform;
 
