@@ -36,6 +36,18 @@ Point.prototype.clone = function ()
 };
 
 /**
+ * Get the distance between two points.
+ * @param a
+ * @param b
+ * @returns {number}
+ */
+Point.prototype.distance = function(a, b) {
+    var x = a.x - b.x;
+    var y = a.y - b.y;
+    return Math.sqrt(x * x + y * y);
+}
+
+/**
  * Copies x and y from the given point
  *
  * @param p {PIXI.Point}
