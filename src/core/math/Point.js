@@ -41,7 +41,7 @@ Point.prototype.clone = function ()
  * @param b
  * @returns {number}
  */
-Point.prototype.distance = function(a, b) {
+Point.distance = function(a, b) {
     var x = a.x - b.x;
     var y = a.y - b.y;
     return Math.sqrt(x * x + y * y);

@@ -582,8 +582,45 @@ DisplayObject.prototype.has = EventEmitter.prototype.hasEventListener = function
     return true;
 }
 
+
+
+function EE(fn, context, once) {
+    this.fn = fn;
+    this.context = context;
+    this.once = once || false;
+}
+
 //准备覆盖方法on
-DisplayObject.prototype.$on = EventEmitter.prototype.on;
+DisplayObject.prototype.$on = function on(event, fn, context) {
+    var listener = new EE(fn, context || this)
+        , evt = prefix ? prefix + event : event;
+
+    if (!this._events) this._events = prefix ? {} : Object.create(null);
+    if (!this._events[evt]) this._events[evt] = listener;
+    else {
+        if (!this._events[evt].fn) {
+            var eventAry = this._events[evt];
+            for (var i = 0; i < eventAry.length; i ++) {
+                var e = eventAry[i];
+                if (e.fn === fn) {
+                    break;
+                }
+            }
+            if (i === eventAry.length) {
+                this._events[evt].push(listener);
+            }
+        } else {
+            if (this._events[evt].fn !== listener.fn) {
+                this._events[evt] = [
+                    this._events[evt], listener
+                ];
+            }
+        }
+    }
+
+    return this;
+};
+
 
 DisplayObject.prototype.on = function on(event, fn, context) {
     if (event === TouchEvent.TOUCH_BEGIN) {
