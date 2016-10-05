@@ -68,7 +68,7 @@ function InteractionManager(renderer, options)
         },
         stopImmediatePropagation:function() {
             this.stopImmediate = true;
-            this.stoped = true;
+            this.stopped = true;
         }
 
     };
@@ -747,11 +747,11 @@ InteractionManager.prototype.onTouchStart = function (event)
 InteractionManager.prototype.captureFunc = function(type, displayObject) {
     // cacpture
     if (this.eventData && this.eventData.captureComplete === false) {
-        var captureAry = [];
+        var captureAry = [displayObject];
         var dis = displayObject.parent;
         while (true) {
             if (dis) {
-                if (dis.interactive) {
+                if (dis.interactive || (dis.dragArea && dis.dragArea.interactive)) {
                     captureAry.push(dis);
                 }
             } else {

@@ -696,11 +696,14 @@ DisplayObject.prototype.$on = function on(event, fn, capture, priority) {
     listener.capture = capture;
     listener.priority = priority || 0;
 
-    if (!this._events) this._events = prefix ? {} : Object.create(null);
-    if (!this._events[evt]) this._events[evt] = listener;
-    else {
-        if (!this._events[evt].fn) {
-            var eventAry = this._events[evt];
+    if (!this._events) {
+        this._events = prefix ? {} : Object.create(null);
+    }
+    if (!this._events[evt]) {
+        this._events[evt] = listener;
+    } else {
+        var eventAry = this._events[evt];
+        if (!eventAry.fn) {
             for (var i = 0; i < eventAry.length; i ++) {
                 var e = eventAry[i];
                 if (e.fn === fn) {
@@ -708,18 +711,21 @@ DisplayObject.prototype.$on = function on(event, fn, capture, priority) {
                 }
             }
             if (i === eventAry.length) {
-                this._events[evt].push(listener);
+                eventAry.push(listener);
             }
         } else {
-            if (this._events[evt].fn !== listener.fn) {
-                this._events[evt] = [
-                    this._events[evt], listener
+            if (eventAry.fn !== listener.fn) {
+                eventAry = [
+                    eventAry, listener
                 ];
+                this._events[evt] = eventAry;
             }
         }
-        this._events[evt].sort(function(a, b) {
-            return b.priority - a.priority;
-        });
+        if (eventAry instanceof Array) {
+            eventAry.sort(function(a, b) {
+                return b.priority - a.priority;
+            });
+        }
     }
 
     return this;
@@ -751,7 +757,7 @@ DisplayObject.prototype.on = function on(event, fn, capture, priority) {
     this.$on(event, fn, capture, priority);
 }
 
-DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
+DisplayObject.prototype.$removeListener = function(event, fn, capture, once) {
     var evt = prefix ? prefix + event : event;
     if (!this._events || !this._events[evt]) return this;
     var listeners = this._events[evt]
@@ -762,7 +768,7 @@ DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
             if (
                 listeners.fn !== fn
                 || (once && !listeners.once)
-                || (context && listeners.context !== context)
+                || (!listeners.capture === capture)
             ) {
                 events.push(listeners);
             }
@@ -771,7 +777,7 @@ DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
                 if (
                     listeners[i].fn !== fn
                     || (once && !listeners[i].once)
-                    || (context && listeners[i].context !== context)
+                    || (!listeners[i].capture === capture)
                 ) {
                     events.push(listeners[i]);
                 }
