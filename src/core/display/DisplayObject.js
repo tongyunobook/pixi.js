@@ -582,18 +582,96 @@ DisplayObject.prototype.has = EventEmitter.prototype.hasEventListener = function
     return true;
 }
 
-
-
 function EE(fn, context, once) {
     this.fn = fn;
     this.context = context;
     this.once = once || false;
+    // 默认不使用冒泡
+    this.bubble = false;
+    // 默认捕获为false
+    this.capture = false;
+}
+
+// 重写emit方法
+DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
+    var evt = prefix ? prefix + event : event;
+
+    if (!this._events || !this._events[evt]) return false;
+
+    var listeners = this._events[evt]
+        , len = arguments.length
+        , args
+        , i;
+
+    if ('function' === typeof listeners.fn) {
+        if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+
+        /*
+        switch (len) {
+            case 1: return listeners.fn.call(listeners.context), true;
+            case 2: return listeners.fn.call(listeners.context, a1), true;
+            case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+            case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+            case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+            case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+        }
+        */
+        if (a1) {
+            for (i = 1, args = []; i < len; i++) {
+                args[i - 1] = arguments[i];
+            }
+            if (listeners.capture === a1.capture) {
+                listeners.fn.apply(listeners.context, args);
+            }
+        } else {
+            listeners.fn.call(listeners.context);
+        }
+    } else {
+        var length = listeners.length
+            , j;
+
+        for (i = 0; i < length; i++) {
+            if (listeners[i].once) {
+                this.removeListener(event, listeners[i].fn, undefined, true);
+            }
+            if (a1 && a1.stopImmediate === true) {
+                break;
+            }
+            if (a1) {
+                for (j = 1, args = []; j < len; j++) {
+                    args[j - 1] = arguments[j];
+                }
+                if (listeners[i].useCapture === a1.capture) {
+                    listeners[i].fn.apply(listeners[i].context, args);
+                }
+            } else {
+                listeners[i].fn.apply(listeners[i].context);
+            }
+            /*
+            switch (len) {
+                case 1: listeners[i].fn.call(listeners[i].context); break;
+                case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+                case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
+                default:
+                    if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
+                        args[j - 1] = arguments[j];
+                    }
+
+                    listeners[i].fn.apply(listeners[i].context, args);
+            }
+            */
+        }
+    }
+
+    return true;
 }
 
 //准备覆盖方法on
-DisplayObject.prototype.$on = function on(event, fn, context) {
-    var listener = new EE(fn, context || this)
+DisplayObject.prototype.$on = function on(event, fn, useCapture, priority) {
+    var listener = new EE(fn, this)
         , evt = prefix ? prefix + event : event;
+    listener.useCapture = useCapture;
+    listener.priority = priority || 0;
 
     if (!this._events) this._events = prefix ? {} : Object.create(null);
     if (!this._events[evt]) this._events[evt] = listener;
@@ -616,35 +694,38 @@ DisplayObject.prototype.$on = function on(event, fn, context) {
                 ];
             }
         }
+        this._events[evt].sort(function(a, b) {
+            return b.priority - a.priority;
+        });
     }
 
     return this;
 };
 
 
-DisplayObject.prototype.on = function on(event, fn, context) {
+DisplayObject.prototype.on = function on(event, fn, useCapture, priority) {
     if (event === TouchEvent.TOUCH_BEGIN) {
-        this.$on('mousedown', fn, context);
-        this.$on('touchstart', fn, context);
+        this.$on('mousedown', fn, useCapture, priority);
+        this.$on('touchstart', fn, useCapture, priority);
         return this;
     } else if (event === TouchEvent.TOUCH_MOVE) {
-        this.$on('mousemove', fn, context);
-        this.$on('touchmove', fn, context);
+        this.$on('mousemove', fn, useCapture, priority);
+        this.$on('touchmove', fn, useCapture, priority);
         return this;
     } else if (event === TouchEvent.TOUCH_END) {
-        this.$on('mouseup', fn, context);
-        this.$on('touchend', fn, context);
+        this.$on('mouseup', fn, useCapture, priority);
+        this.$on('touchend', fn, useCapture, priority);
         return this;
     } else if (event === TouchEvent.TAP) {
-        this.$on('click', fn, context);
-        this.$on('tap', fn, context);
+        this.$on('click', fn, useCapture, priority);
+        this.$on('tap', fn, useCapture, priority);
         return this;
     } else if (event === TouchEvent.TOUCH_END_OUDSIDE) {
-        this.$on('mouseupoutside', fn, context);
-        this.$on('touchendoutside', fn, context);
+        this.$on('mouseupoutside', fn, useCapture, priority);
+        this.$on('touchendoutside', fn, useCapture, priority);
         return this;
     }
-    this.$on(event, fn, context);
+    this.$on(event, fn, useCapture, priority);
 }
 
 DisplayObject.prototype.$removeListener = function(event, fn, context, once) {

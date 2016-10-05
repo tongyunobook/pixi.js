@@ -65,7 +65,12 @@ function InteractionManager(renderer, options)
         data: this.mouse,
         stopPropagation:function(){
             this.stopped = true;
+        },
+        stopImmediatePropagation:function() {
+            this.stopImmediate = true;
+            this.stoped = true;
         }
+
     };
 
     /**
@@ -446,6 +451,7 @@ InteractionManager.prototype.processInteractive = function (point, displayObject
                 //}
 
                 // we can break now as we have hit an object.
+                //break;
             }
         }
     }
@@ -495,6 +501,8 @@ InteractionManager.prototype.onMouseDown = function (event)
     this.mouse.originalEvent = event;
     this.eventData.data = this.mouse;
     this.eventData.stopped = false;
+    this.eventData.stopImmediate = false;
+    this.eventData.captureComplete = false;
 
     // Update internal mouse reference
     this.mapPositionToPoint( this.mouse.global, event.clientX, event.clientY);
@@ -522,6 +530,7 @@ InteractionManager.prototype.processMouseDown = function ( displayObject, hit )
 
     if(hit)
     {
+        this.captureFunc(isRightButton ? 'rightdown' : 'mousedown', displayObject);
         displayObject[ isRightButton ? '_isRightDown' : '_isLeftDown' ] = true;
         this.dispatchEvent( displayObject, isRightButton ? 'rightdown' : 'mousedown', this.eventData );
     }
@@ -541,6 +550,8 @@ InteractionManager.prototype.onMouseUp = function (event)
     this.mouse.originalEvent = event;
     this.eventData.data = this.mouse;
     this.eventData.stopped = false;
+    this.eventData.stopImmediate = false;
+    this.eventData.captureComplete = false;
 
     // Update internal mouse reference
     this.mapPositionToPoint( this.mouse.global, event.clientX, event.clientY);
@@ -569,6 +580,7 @@ InteractionManager.prototype.processMouseUp = function ( displayObject, hit )
         if( displayObject[ isDown ] )
         {
             displayObject[ isDown ] = false;
+            this.captureFunc(isRightButton ? 'rightclick' : 'click', displayObject);
             this.dispatchEvent( displayObject, isRightButton ? 'rightclick' : 'click', this.eventData );
         }
     }
@@ -577,6 +589,7 @@ InteractionManager.prototype.processMouseUp = function ( displayObject, hit )
         if( displayObject[ isDown ] )
         {
             displayObject[ isDown ] = false;
+            this.captureFunc(isRightButton ? 'rightupoutside' : 'mouseupoutside', displayObject);
             this.dispatchEvent( displayObject, isRightButton ? 'rightupoutside' : 'mouseupoutside', this.eventData );
         }
     }
@@ -594,6 +607,8 @@ InteractionManager.prototype.onMouseMove = function (event)
     this.mouse.originalEvent = event;
     this.eventData.data = this.mouse;
     this.eventData.stopped = false;
+    this.eventData.stopImmediate = false;
+    this.eventData.captureComplete = false;
 
     this.mapPositionToPoint( this.mouse.global, event.clientX, event.clientY);
 
@@ -626,6 +641,7 @@ InteractionManager.prototype.processMouseMove = function ( displayObject, hit )
     // only display on mouse over
     if(!this.moveWhenInside || hit)
     {
+        this.captureFunc('mousemove', displayObject);
         this.dispatchEvent( displayObject, 'mousemove', this.eventData);
     }
 };
@@ -641,6 +657,8 @@ InteractionManager.prototype.onMouseOut = function (event)
 {
     this.mouse.originalEvent = event;
     this.eventData.stopped = false;
+    this.eventData.stopImmediate = false;
+    this.eventData.captureComplete = false;
 
     // Update internal mouse reference
     this.mapPositionToPoint( this.mouse.global, event.clientX, event.clientY);
@@ -712,12 +730,50 @@ InteractionManager.prototype.onTouchStart = function (event)
 
         this.eventData.data = touchData;
         this.eventData.stopped = false;
+        this.eventData.stopImmediate = false;
+        this.eventData.captureComplete = false;
 
         this.processInteractive( touchData.global, this.renderer._lastObjectRendered, this.processTouchStart, true , undefined, touchData);
 
         this.returnTouchData( touchData );
     }
 };
+
+/**
+ * 捕获方法
+ * @param type 事件类型
+ * @param displayObject 事件对象
+ */
+InteractionManager.prototype.captureFunc = function(type, displayObject) {
+    // cacpture
+    if (this.eventData && this.eventData.captureComplete === false) {
+        var captureAry = [];
+        var dis = displayObject.parent;
+        while (true) {
+            if (dis) {
+                if (dis.interactive) {
+                    captureAry.push(dis);
+                }
+            } else {
+                break;
+            }
+            dis = dis.parent;
+        }
+        // 设置捕获为true
+        this.eventData.capture = true;
+        for (var i = captureAry.length - 1; i >= 0; i --) {
+            var dis = captureAry[i];
+            // 事件流停止
+            if (this.eventData.stopImmediate) {
+                break;
+            }
+            this.dispatchEvent( dis, type, this.eventData );
+        }
+        this.eventData.captureComplete = true;
+        // 还原捕获
+        this.eventData.capture = false;
+    }
+}
 
 /**
  * Processes the result of a touch check and dispatches the event if need be
@@ -734,6 +790,9 @@ InteractionManager.prototype.processTouchStart = function ( displayObject, hit, 
         if (displayObject._touchID === undefined) {
             displayObject._touchID = {};
         }
+        // cacpture
+        this.captureFunc('touchstart', displayObject);
+
         displayObject._touchID[touchData.identifier] = true;
         this.dispatchEvent( displayObject, 'touchstart', this.eventData );
     }
@@ -766,6 +825,8 @@ InteractionManager.prototype.onTouchEnd = function (event)
         //TODO this should be passed along.. no set
         this.eventData.data = touchData;
         this.eventData.stopped = false;
+        this.eventData.stopImmediate = false;
+        this.eventData.captureComplete = false;
 
 
         this.processInteractive( touchData.global, this.renderer._lastObjectRendered, this.processTouchEnd, true ,undefined, touchData);
@@ -790,6 +851,7 @@ InteractionManager.prototype.processTouchEnd = function ( displayObject, hit, to
             var id = touchData.identifier;
             if (displayObject._touchID[id] === true) {
                 delete displayObject._touchID[id];
+                this.captureFunc('touchend', displayObject);
                 this.dispatchEvent( displayObject, 'touchend', this.eventData );
             }
         }
@@ -807,6 +869,7 @@ InteractionManager.prototype.processTouchEnd = function ( displayObject, hit, to
         if (displayObject._touchID) {
             var id = touchData.identifier;
             if (displayObject._touchID[id] === true) {
+                this.captureFunc('touchendoutside', displayObject);
                 this.dispatchEvent( displayObject, 'touchendoutside', this.eventData );
                 delete displayObject._touchID[id];
             }
@@ -847,6 +910,8 @@ InteractionManager.prototype.onTouchMove = function (event)
 
         this.eventData.data = touchData;
         this.eventData.stopped = false;
+        this.eventData.stopImmediate = false;
+        this.eventData.captureComplete = false;
 
         this.processInteractive( touchData.global, this.renderer._lastObjectRendered, this.processTouchMove, this.moveWhenInside , undefined, touchData );
 
@@ -865,6 +930,7 @@ InteractionManager.prototype.processTouchMove = function ( displayObject, hit )
 {
     if(!this.moveWhenInside || hit)
     {
+        this.captureFunc('touchmove', displayObject);
         this.dispatchEvent( displayObject, 'touchmove', this.eventData);
     }
 };
