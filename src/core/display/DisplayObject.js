@@ -595,6 +595,10 @@ function EE(fn, context, once) {
 // 重写emit方法
 DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
     var evt = prefix ? prefix + event : event;
+    // 设置a1的默认值
+    if (a1 && a1.capture === undefined) {
+        a1.capture = false;
+    }
 
     if (!this._events || !this._events[evt]) return false;
 
@@ -641,7 +645,7 @@ DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
                 for (j = 1, args = []; j < len; j++) {
                     args[j - 1] = arguments[j];
                 }
-                if (listeners[i].useCapture === a1.capture) {
+                if (listeners[i].capture === a1.capture) {
                     listeners[i].fn.apply(listeners[i].context, args);
                 }
             } else {
@@ -666,11 +670,30 @@ DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
     return true;
 }
 
+DisplayObject.prototype.once = function once(event, fn, context) {
+    var listener = new EE(fn, context || this, true)
+        , evt = prefix ? prefix + event : event;
+
+    if (!this._events) this._events = prefix ? {} : Object.create(null);
+    if (!this._events[evt]) this._events[evt] = listener;
+    else {
+        if (!this._events[evt].fn) this._events[evt].push(listener);
+        else this._events[evt] = [
+            this._events[evt], listener
+        ];
+    }
+
+    return this;
+};
+
 //准备覆盖方法on
-DisplayObject.prototype.$on = function on(event, fn, useCapture, priority) {
+DisplayObject.prototype.$on = function on(event, fn, capture, priority) {
     var listener = new EE(fn, this)
         , evt = prefix ? prefix + event : event;
-    listener.useCapture = useCapture;
+    if (capture === undefined) {
+        capture = false;
+    }
+    listener.capture = capture;
     listener.priority = priority || 0;
 
     if (!this._events) this._events = prefix ? {} : Object.create(null);
@@ -703,29 +726,29 @@ DisplayObject.prototype.$on = function on(event, fn, useCapture, priority) {
 };
 
 
-DisplayObject.prototype.on = function on(event, fn, useCapture, priority) {
+DisplayObject.prototype.on = function on(event, fn, capture, priority) {
     if (event === TouchEvent.TOUCH_BEGIN) {
-        this.$on('mousedown', fn, useCapture, priority);
-        this.$on('touchstart', fn, useCapture, priority);
+        this.$on('mousedown', fn, capture, priority);
+        this.$on('touchstart', fn, capture, priority);
         return this;
     } else if (event === TouchEvent.TOUCH_MOVE) {
-        this.$on('mousemove', fn, useCapture, priority);
-        this.$on('touchmove', fn, useCapture, priority);
+        this.$on('mousemove', fn, capture, priority);
+        this.$on('touchmove', fn, capture, priority);
         return this;
     } else if (event === TouchEvent.TOUCH_END) {
-        this.$on('mouseup', fn, useCapture, priority);
-        this.$on('touchend', fn, useCapture, priority);
+        this.$on('mouseup', fn, capture, priority);
+        this.$on('touchend', fn, capture, priority);
         return this;
     } else if (event === TouchEvent.TAP) {
-        this.$on('click', fn, useCapture, priority);
-        this.$on('tap', fn, useCapture, priority);
+        this.$on('click', fn, capture, priority);
+        this.$on('tap', fn, capture, priority);
         return this;
     } else if (event === TouchEvent.TOUCH_END_OUDSIDE) {
-        this.$on('mouseupoutside', fn, useCapture, priority);
-        this.$on('touchendoutside', fn, useCapture, priority);
+        this.$on('mouseupoutside', fn, capture, priority);
+        this.$on('touchendoutside', fn, capture, priority);
         return this;
     }
-    this.$on(event, fn, useCapture, priority);
+    this.$on(event, fn, capture, priority);
 }
 
 DisplayObject.prototype.$removeListener = function(event, fn, context, once) {
