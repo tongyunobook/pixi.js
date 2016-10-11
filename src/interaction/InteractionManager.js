@@ -751,9 +751,9 @@ InteractionManager.prototype.captureFunc = function(type, displayObject) {
         var dis = displayObject.parent;
         while (true) {
             if (dis) {
-                if (dis.interactive || (dis.dragArea && dis.dragArea.interactive)) {
+                //if (dis.interactive || (dis.dragArea && dis.dragArea.interactive)) {
                     captureAry.push(dis);
-                }
+                //}
             } else {
                 break;
             }

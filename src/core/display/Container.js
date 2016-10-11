@@ -481,6 +481,20 @@ Container.prototype.getBounds = function ()
 
 Container.prototype.containerGetBounds = Container.prototype.getBounds;
 
+Container.prototype.clone = function() {
+    if (this._nbData_ !== undefined) {
+        var n = this.name;
+        var dis = this.root.createChildFromData(this.parent, this._nbData_,  this._textureMapName_);
+        if (n) {
+            this.parent[n] = this;
+        }
+        return dis;
+    } else {
+        console.warn('无法克隆');
+        return null;
+    }
+}
+
 /**
  * Retrieves the non-global local bounds of the Container as a rectangle.
  * The calculation takes all visible children into consideration.
@@ -596,7 +610,6 @@ Container.prototype._renderCanvas = function (renderer) // jshint unused:false
 {
     // this is where content itself gets rendered...
 };
-
 
 /**
  * Renders the object using the Canvas renderer

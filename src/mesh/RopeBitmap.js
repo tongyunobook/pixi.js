@@ -119,15 +119,18 @@ RopeBitmap.prototype.refresh = function ()
         var distance = core.Point.distance(points[i - 1], point);
         var distancePercent = distance / this._texture.frame.width;
         disOffset += distancePercent;
+        if (disOffset > 1) {
+            disOffset = 1;
+        }
 
         index = i * 4;
         // time to do some smart drawing!
         amount = i / (total-1);
 
-        uvs[index] = offset.x + disOffset;
+        uvs[index] = offset.x + disOffset * factor.x;
         uvs[index+1] = 0 + offset.y;
 
-        uvs[index+2] = offset.x + disOffset;
+        uvs[index+2] = offset.x + disOffset * factor.x;
         uvs[index+3] = 1 * factor.y + offset.y;
         /*
          uvs[index] = amount * factor.x + offset.x;

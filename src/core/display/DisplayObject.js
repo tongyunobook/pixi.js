@@ -346,6 +346,7 @@ DisplayObject.prototype.addEventListener = function() {
     this.interactive = true;
     this.on.apply(this, arguments);
 }
+
 /**
  *
  *
@@ -379,6 +380,28 @@ Object.defineProperty(DisplayObject.prototype, 'root', {
 
     set : function(value) {
         this._root_ = value;
+    }
+});
+
+/**
+ * 获取当前容器所在的BaseEquipment容器
+ */
+Object.defineProperty(DisplayObject.prototype, 'currentEquipment', {
+    get : function() {
+        if (this._currentEq_ === undefined) {
+            if (window.chemical === undefined) {
+                return undefined;
+            }
+            var eq = this;
+            while (eq) {
+                if (eq instanceof chemical.core.BaseEquipment) {
+                    this._currentEq_ = eq;
+                    return eq;
+                }
+                eq = eq.parent;
+            }
+        }
+        return this._currentEq_;
     }
 });
 
