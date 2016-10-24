@@ -402,6 +402,9 @@ Object.defineProperty(DisplayObject.prototype, 'currentEquipment', {
             }
         }
         return this._currentEq_;
+    },
+    set : function(c) {
+        this._currentEq_ = c;
     }
 });
 

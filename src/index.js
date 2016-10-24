@@ -13,6 +13,9 @@ core.particles      = require('./particles');
 core.accessibility  = require('./accessibility');
 core.extract  		= require('./extract');
 
+// add eventEmitter
+core.EventEmitter   = require('eventemitter3');
+
 // export a premade loader instance
 /**
  * A premade instance of the loader that can be used to loader resources.
