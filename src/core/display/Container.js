@@ -2,6 +2,8 @@ var math = require('../math'),
     utils = require('../utils'),
     DisplayObject = require('./DisplayObject');
 
+Container.RootClass = Container;
+
 /**
  * A Container represents a collection of display objects.
  * It is the base class of all display objects that act as a container for other objects.
@@ -159,11 +161,48 @@ Container.prototype.addChild = function (child)
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.onChildrenChange(this.children.length-1);
+        if (this.root instanceof Container.RootClass) {
+            emitAddedToStage(child);
+        } else {
+            this.root = undefined;
+        }
         child.emit('added', this);
     }
 
     return child;
 };
+
+
+/**
+ * 派发添加到舞台的消息
+ */
+function emitAddedToStage(c) {
+    if (c instanceof Container) {
+        c.emit('addedToStage');
+        c.children.map(function(_c) {
+            emitAddedToStage(_c);
+        });
+    } else {
+        c.emit('addedToStage');
+    }
+}
+
+/**
+ * 当移除到舞台的时候发出
+ * @param c
+ */
+function emitRemovedFromStage(c) {
+    if (c instanceof Container) {
+        c.emit('removedFromStage');
+        c.children.map(function(_c) {
+            emitRemovedFromStage(_c);
+        });
+    } else {
+        c.emit('removedFromStage');
+        // 移除root
+        c.root = undefined;
+    }
+}
 
 /**
  * Adds a child to the container at a specified index. If the index is out of bounds an error will be thrown
@@ -187,7 +226,14 @@ Container.prototype.addChildAt = function (child, index)
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.onChildrenChange(index);
+        if (this.root instanceof Container.RootClass) {
+            emitAddedToStage(child);
+        } else {
+            this.root = undefined;
+        }
         child.emit('added', this);
+
+
 
         return child;
     }
@@ -311,6 +357,8 @@ Container.prototype.removeChild = function (child)
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.onChildrenChange(index);
+
+        emitRemovedFromStage(child);
         child.emit('removed', this);
     }
 
@@ -332,6 +380,7 @@ Container.prototype.removeChildAt = function (index)
 
     // TODO - lets either do all callbacks or all events.. not both!
     this.onChildrenChange(index);
+    emitRemovedFromStage(child);
     child.emit('removed', this);
 
     return child;
@@ -363,6 +412,7 @@ Container.prototype.removeChildren = function (beginIndex, endIndex)
 
         for (i = 0; i < removed.length; ++i)
         {
+            emitRemovedFromStage(removed[i]);
             removed[i].emit('removed', this);
         }
 
