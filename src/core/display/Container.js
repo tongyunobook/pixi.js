@@ -463,6 +463,9 @@ Container.prototype.containerUpdateTransform = Container.prototype.updateTransfo
  */
 Container.prototype.getBounds = function ()
 {
+    if (this.allowGetBounds === false) {
+        return math.Rectangle.EMPTY;
+    }
     if(!this._currentBounds)
     {
 

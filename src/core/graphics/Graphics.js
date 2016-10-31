@@ -764,6 +764,9 @@ Graphics.prototype._renderCanvas = function (renderer)
  */
 Graphics.prototype.getBounds = function (matrix)
 {
+    if (this.allowGetBounds === false) {
+        return math.Rectangle.EMPTY;
+    }
     if(!this._currentBounds)
     {
 

@@ -284,6 +284,10 @@ Sprite.prototype._renderCanvas = function (renderer)
  */
 Sprite.prototype.getBounds = function ()
 {
+    if (this.allowGetBounds === false) {
+        return math.Rectangle.EMPTY;
+    }
+
     //TODO lookinto caching..
     if(!this._currentBounds)
     {

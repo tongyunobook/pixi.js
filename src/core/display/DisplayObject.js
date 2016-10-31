@@ -103,6 +103,12 @@ function DisplayObject()
      * @private
      */
     this._mask = null;
+
+    /**
+     * 是否允许获取bounds
+     * @type {boolean}
+     */
+    this.allowGetBounds = true;
 }
 
 // constructor
