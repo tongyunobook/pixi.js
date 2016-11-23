@@ -354,6 +354,13 @@ DisplayObject.prototype.addEventListener = function() {
 }
 
 /**
+ * 发送消息
+ */
+DisplayObject.prototype.dispatchEvent = function() {
+    this.emit.apply(this, arguemnts);
+}
+
+/**
  *
  *
  * Retrieves the bounds of the displayObject as a rectangle object

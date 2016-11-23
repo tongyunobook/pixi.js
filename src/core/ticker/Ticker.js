@@ -17,7 +17,7 @@ function Ticker()
 {
     var _this = this;
 
-    /**
+    /**d
      * Internal tick method bound to ticker instance.
      * This is because in early 2015, Function.bind
      * is still 60% slower in high performance scenarios.
@@ -242,6 +242,9 @@ Ticker.prototype._startIfPossible = function _startIfPossible()
  */
 Ticker.prototype.add = function add(fn, context)
 {
+    if (this.has(fn)) {
+        return;
+    }
     this._emitter.on(TICK, fn, context);
 
     this._startIfPossible();
@@ -300,6 +303,32 @@ Ticker.prototype.start = function start()
         this._requestIfNeeded();
     }
 };
+
+/***
+ * 是否包含某个方法
+ * @param fn
+ * @returns {*}
+ */
+Ticker.prototype.has = function(fn) {
+    if (!this._emitter._events) {
+        return false;
+    }
+    var fnOrAry = this._emitter._events.tick;
+    if (!fnOrAry) {
+        return false;
+    }
+    if (fnOrAry instanceof Array) {
+        for (var i = 0; i < fnOrAry.length; i ++) {
+            var _fn = fnOrAry[i];
+            if (_fn.fn === fn) {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        return fn === fnOrAry.fn;
+    }
+}
 
 /**
  * Stops the ticker. If the ticker has requested
