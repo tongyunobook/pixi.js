@@ -357,7 +357,7 @@ DisplayObject.prototype.addEventListener = function() {
  * 发送消息
  */
 DisplayObject.prototype.dispatchEvent = function() {
-    this.emit.apply(this, arguemnts);
+    this.emit.apply(this, arguments);
 }
 
 /**
