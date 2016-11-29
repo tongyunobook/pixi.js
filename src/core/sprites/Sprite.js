@@ -340,17 +340,19 @@ Sprite.prototype.getBounds = function ()
         if(this.children.length)
         {
             var childBounds = this.containerGetBounds();
+            // 如果childBounds是空矩形则不参与计算
+            if (childBounds.width * childBounds.height !== 0) {
+                w0 = childBounds.x;
+                w1 = childBounds.x + childBounds.width;
+                h0 = childBounds.y;
+                h1 = childBounds.y + childBounds.height;
 
-            w0 = childBounds.x;
-            w1 = childBounds.x + childBounds.width;
-            h0 = childBounds.y;
-            h1 = childBounds.y + childBounds.height;
+                minX = (minX < w0) ? minX : w0;
+                minY = (minY < h0) ? minY : h0;
 
-            minX = (minX < w0) ? minX : w0;
-            minY = (minY < h0) ? minY : h0;
-
-            maxX = (maxX > w1) ? maxX : w1;
-            maxY = (maxY > h1) ? maxY : h1;
+                maxX = (maxX > w1) ? maxX : w1;
+                maxY = (maxY > h1) ? maxY : h1;
+            }
         }
 
         var bounds = this._bounds;
