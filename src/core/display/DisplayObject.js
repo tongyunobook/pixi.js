@@ -427,20 +427,6 @@ Object.defineProperty(DisplayObject.prototype, 'currentEquipment', {
  * @return {boolean}
  */
 DisplayObject.prototype.hitTest = function(dis) {
-    /*
-    var rect1 = this.getBounds();
-    var rect2 = dis.getBounds();
-    //get the maximum x,y between rect1 and rect2.
-    var x = Math.max(rect1.x, rect2.x);
-    var y = Math.max(rect1.y, rect2.y);
-    //calculateing width and height of intersection area.
-    var w = Math.min(rect1.x + rect1.width, rect2.x + rect2.width) - x;
-    var h = Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - y;
-    if (h <= 0 || w <= 0) {
-        return false;
-    }
-    return true;
-    */
     var conf = this;
     var localBoundsA = this.getLocalBounds().clone();
     var localBoundsB = dis.getLocalBounds().clone();
@@ -448,39 +434,16 @@ DisplayObject.prototype.hitTest = function(dis) {
     dis.updateTransform();
     var rect1 = this.getBounds();
     var rect2 = dis.getBounds();
-    var globalA = this.toGlobal({x:localBoundsA.x, y:localBoundsA.y})//{x:this.toGlobal({x:0, y:0}).x + localBoundsA.x, y:this.toGlobal({x:0, y:0}).y + localBoundsA.y};
-    var globalB = dis.toGlobal({x:localBoundsB.x, y:localBoundsB.y})//{x:dis.toGlobal({x:0, y:0}).x + localBoundsB.x, y:dis.toGlobal({x:0, y:0}).y + localBoundsB.y};
-
-    //console.log(rectPoint(this, rect1, localBoundsA), rectPoint(dis, rect2, localBoundsB))
-    //找到最外层的旋转角度
-    function findRotate (a) {
-        var r = 0;
-        function viewStack (a) {
-            if(a.viewStack) {
-                r = a.rotation;
-            }else{
-                viewStack(a.parent)
-            }
-        }
-        viewStack (a)
-        return r;
-    }
-
-    //矩形的四个顶点
-    function rectPoint (target, global, bounds) {
-        var rotateA = findRotate(target);
-
-        var _x1 = global.x + Math.cos(rotateA) * bounds.width;
-        var _y1 = global.y + Math.sin(rotateA) * bounds.width;
-
-        var _x3 = global.x - Math.sin(rotateA) * bounds.height;
-        var _y3 = global.y + Math.cos(rotateA) * bounds.height;
-
-        var _x2 = bounds.width * Math.cos(rotateA) - bounds.height * Math.sin(rotateA) + global.x;
-        var _y2 = bounds.width * Math.sin(rotateA) + bounds.height * Math.cos(rotateA) + global.y;
-
-        return [{x:global.x, y:global.y}, {x:_x1, y:_y1}, {x:_x2, y:_y2}, {x:_x3, y:_y3}]
-    }
+    // 矩形R1的4个顶点
+    var r1TL = this.toGlobal({x:localBoundsA.x, y:localBoundsA.y});
+    var r1TR = this.toGlobal({x:localBoundsA.x + localBoundsA.width, y:localBoundsA.y});
+    var r1BL = this.toGlobal({x:localBoundsA.x, y:localBoundsA.y + localBoundsA.height});
+    var r1BR = this.toGlobal({x:localBoundsA.x + localBoundsA.width, y:localBoundsA.y + localBoundsA.height});
+    // 矩形R2的4个顶点
+    var r2TL = dis.toGlobal({x:localBoundsB.x, y:localBoundsB.y});
+    var r2TR = dis.toGlobal({x:localBoundsB.x + localBoundsB.width, y:localBoundsB.y});
+    var r2BL = dis.toGlobal({x:localBoundsB.x, y:localBoundsB.y + localBoundsB.height});
+    var r2BR = dis.toGlobal({x:localBoundsB.x + localBoundsB.width, y:localBoundsB.y + localBoundsB.height});
 
     //求交点
     function intersectPoint (a, b, c, d) {
@@ -510,27 +473,13 @@ DisplayObject.prototype.hitTest = function(dis) {
         //否则不相交
         return false
     }
-    //var pointAry = [];
-    //
-    //dragline()
-    //function dragline () {
-    //    var arr0 = rectPoint(conf, globalA, localBoundsA);
-    //    var arr1 = rectPoint(dis, globalB, localBoundsB);
-    //
-    //    for(var i = 0 ; i < 4; i ++) {
-    //        var g = new PIXI.Graphics();
-    //        g.beginFill(0x0, 1)
-    //        g.drawCircle(arr1[i].x, arr1[i].y, 5);
-    //        g.drawCircle(arr0[i].x, arr0[i].y, 5);
-    //        pointAry.push(g);
-    //        conf.viewStack.addChild(g);
-    //    }
-    //}
 
     //判断是否相交
     function check () {
-        var arr0 = rectPoint(conf, globalA, localBoundsA);
-        var arr1 = rectPoint(dis, globalB, localBoundsB);
+        var arr0 = [r1TL, r1TR, r1BR, r1BL];
+        var arr1 = [r2TL, r2TR, r2BR, r2BL];
+        // var arr0 = rectPoint(conf, globalA, localBoundsA);
+        // var arr1 = rectPoint(dis, globalB, localBoundsB);
         for(var i = 0 ; i < arr0.length ; i++) {
             var a0 = arr0[i];
             var a1 = arr0[(i + 1) % arr0.length];
@@ -571,7 +520,7 @@ DisplayObject.prototype.hitTest = function(dis) {
         return inside;
     }
 
-    return check ()
+    return check();
 }
 
 /**
