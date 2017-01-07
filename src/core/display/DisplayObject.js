@@ -427,6 +427,7 @@ Object.defineProperty(DisplayObject.prototype, 'currentEquipment', {
  * @return {boolean}
  */
 DisplayObject.prototype.hitTest = function(dis) {
+    /*
     var rect1 = this.getBounds();
     var rect2 = dis.getBounds();
     //get the maximum x,y between rect1 and rect2.
@@ -439,6 +440,138 @@ DisplayObject.prototype.hitTest = function(dis) {
         return false;
     }
     return true;
+    */
+    var conf = this;
+    var localBoundsA = this.getLocalBounds().clone();
+    var localBoundsB = dis.getLocalBounds().clone();
+    this.updateTransform();
+    dis.updateTransform();
+    var rect1 = this.getBounds();
+    var rect2 = dis.getBounds();
+    var globalA = this.toGlobal({x:localBoundsA.x, y:localBoundsA.y})//{x:this.toGlobal({x:0, y:0}).x + localBoundsA.x, y:this.toGlobal({x:0, y:0}).y + localBoundsA.y};
+    var globalB = dis.toGlobal({x:localBoundsB.x, y:localBoundsB.y})//{x:dis.toGlobal({x:0, y:0}).x + localBoundsB.x, y:dis.toGlobal({x:0, y:0}).y + localBoundsB.y};
+
+    //console.log(rectPoint(this, rect1, localBoundsA), rectPoint(dis, rect2, localBoundsB))
+    //找到最外层的旋转角度
+    function findRotate (a) {
+        var r = 0;
+        function viewStack (a) {
+            if(a.viewStack) {
+                r = a.rotation;
+            }else{
+                viewStack(a.parent)
+            }
+        }
+        viewStack (a)
+        return r;
+    }
+
+    //矩形的四个顶点
+    function rectPoint (target, global, bounds) {
+        var rotateA = findRotate(target);
+
+        var _x1 = global.x + Math.cos(rotateA) * bounds.width;
+        var _y1 = global.y + Math.sin(rotateA) * bounds.width;
+
+        var _x3 = global.x - Math.sin(rotateA) * bounds.height;
+        var _y3 = global.y + Math.cos(rotateA) * bounds.height;
+
+        var _x2 = bounds.width * Math.cos(rotateA) - bounds.height * Math.sin(rotateA) + global.x;
+        var _y2 = bounds.width * Math.sin(rotateA) + bounds.height * Math.cos(rotateA) + global.y;
+
+        return [{x:global.x, y:global.y}, {x:_x1, y:_y1}, {x:_x2, y:_y2}, {x:_x3, y:_y3}]
+    }
+
+    //求交点
+    function intersectPoint (a, b, c, d) {
+        /** 1 解线性方程组, 求线段交点. **/
+            // 如果分母为0 则平行或共线, 不相交
+        var denominator = (b.y - a.y)*(d.x - c.x) - (a.x - b.x)*(c.y - d.y);
+        if (denominator==0) {
+            return false;
+        }
+
+        // 线段所在直线的交点坐标 (x , y)
+        var x = ( (b.x - a.x) * (d.x - c.x) * (c.y - a.y) + (b.y - a.y) * (d.x - c.x) * a.x - (d.y - c.y) * (b.x - a.x) * c.x ) / denominator ;
+        var y = -( (b.y - a.y) * (d.y - c.y) * (c.x - a.x) + (b.x - a.x) * (d.y - c.y) * a.y - (d.x - c.x) * (b.y - a.y) * c.y ) / denominator;
+
+        /** 2 判断交点是否在两条线段上 **/
+        if (// 交点在线段1上
+        (x - a.x) * (x - b.x) <= 0 && (y - a.y) * (y - b.y) <= 0
+        // 且交点也在线段2上
+        && (x - c.x) * (x - d.x) <= 0 && (y - c.y) * (y - d.y) <= 0
+        ){
+            // 返回交点p
+            return {
+                x : x,
+                y : y
+            }
+        }
+        //否则不相交
+        return false
+    }
+    //var pointAry = [];
+    //
+    //dragline()
+    //function dragline () {
+    //    var arr0 = rectPoint(conf, globalA, localBoundsA);
+    //    var arr1 = rectPoint(dis, globalB, localBoundsB);
+    //
+    //    for(var i = 0 ; i < 4; i ++) {
+    //        var g = new PIXI.Graphics();
+    //        g.beginFill(0x0, 1)
+    //        g.drawCircle(arr1[i].x, arr1[i].y, 5);
+    //        g.drawCircle(arr0[i].x, arr0[i].y, 5);
+    //        pointAry.push(g);
+    //        conf.viewStack.addChild(g);
+    //    }
+    //}
+
+    //判断是否相交
+    function check () {
+        var arr0 = rectPoint(conf, globalA, localBoundsA);
+        var arr1 = rectPoint(dis, globalB, localBoundsB);
+        for(var i = 0 ; i < arr0.length ; i++) {
+            var a0 = arr0[i];
+            var a1 = arr0[(i + 1) % arr0.length];
+            for(var j = 0 ; j < arr1.length ; j ++) {
+                var b0 = arr1[j];
+                var b1 = arr1[(j + 1) % arr1.length];
+                if(intersectPoint (a0, a1, b0, b1)) {
+                    //throw intersectPoint (a0, a1, b0, b1)
+                    console.log('找到了一个焦点' +
+                        intersectPoint (a0, a1, b0, b1))
+                    return true;
+                }
+            }
+
+        }
+        for(var i = 0 ; i < arr0.length; i ++) {
+            if(containsPoint(arr1, arr0[i])) {
+                console.log('点在矩形的内部')
+                return true;
+            }
+        }
+        return false;
+    }
+
+    //点在矩形内
+    function containsPoint (vs, p) {
+        var x = p.x;
+        var y = p.y;
+        var inside = false;
+        for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+            var xi = vs[i].x, yi = vs[i].y;
+            var xj = vs[j].x, yj = vs[j].y;
+
+            var intersect = ((yi > y) != (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+        return inside;
+    }
+
+    return check ()
 }
 
 /**
@@ -634,6 +767,7 @@ function EE(fn, context, once) {
 // 重写emit方法
 DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
     var evt = prefix ? prefix + event : event;
+
     // 设置a1的默认值
     if (a1 && a1.capture === undefined) {
         a1.capture = false;
@@ -659,11 +793,11 @@ DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
             case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
         }
         */
-        if (a1) {
+        if (a1 !== undefined) {
             for (i = 1, args = []; i < len; i++) {
                 args[i - 1] = arguments[i];
             }
-            if (listeners.capture === a1.capture) {
+            if (listeners.capture === a1.capture || a1.capture === undefined) {
                 listeners.fn.apply(listeners.context, args);
             }
         } else {
@@ -680,29 +814,16 @@ DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
             if (a1 && a1.stopImmediate === true) {
                 break;
             }
-            if (a1) {
+            if (a1 !== undefined) {
                 for (j = 1, args = []; j < len; j++) {
                     args[j - 1] = arguments[j];
                 }
-                if (listeners[i].capture === a1.capture) {
+                if (listeners[i].capture === a1.capture || a1.capture === undefined) {
                     listeners[i].fn.apply(listeners[i].context, args);
                 }
             } else {
                 listeners[i].fn.apply(listeners[i].context);
             }
-            /*
-            switch (len) {
-                case 1: listeners[i].fn.call(listeners[i].context); break;
-                case 2: listeners[i].fn.call(listeners[i].context, a1); break;
-                case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
-                default:
-                    if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
-                        args[j - 1] = arguments[j];
-                    }
-
-                    listeners[i].fn.apply(listeners[i].context, args);
-            }
-            */
         }
     }
 
