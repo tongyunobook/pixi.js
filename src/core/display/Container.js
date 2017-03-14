@@ -440,6 +440,11 @@ Container.prototype.updateTransform = function ()
         return;
     }
 
+    if (!this.parent)
+    {
+        return;
+    }
+
     this.transform = this.parent.transform.updateChildTransform(this.transform);
 
     //TODO: check render flags, how to process stuff here

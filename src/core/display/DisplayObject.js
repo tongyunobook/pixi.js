@@ -488,8 +488,7 @@ DisplayObject.prototype.hitTest = function(dis) {
                 var b1 = arr1[(j + 1) % arr1.length];
                 if(intersectPoint (a0, a1, b0, b1)) {
                     //throw intersectPoint (a0, a1, b0, b1)
-                    console.log('找到了一个焦点' +
-                        intersectPoint (a0, a1, b0, b1))
+                    intersectPoint (a0, a1, b0, b1);
                     return true;
                 }
             }
@@ -497,7 +496,11 @@ DisplayObject.prototype.hitTest = function(dis) {
         }
         for(var i = 0 ; i < arr0.length; i ++) {
             if(containsPoint(arr1, arr0[i])) {
-                console.log('点在矩形的内部')
+                return true;
+            }
+        }
+        for (var i = 0; i < arr1.length; i++) {
+            if (containsPoint(arr0, arr1[i])) {
                 return true;
             }
         }
