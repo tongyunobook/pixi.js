@@ -58,6 +58,18 @@ export default class Point
     }
 
     /**
+     * Get the distance between two points.
+     * @param a
+     * @param b
+     * @returns {number}
+     */
+    distance(a, b) {
+        var x = a.x - b.x;
+        var y = a.y - b.y;
+        return Math.sqrt(x * x + y * y);
+    }
+
+    /**
      * Sets the point to a new x and y position.
      * If y is omitted, both x and y will be set to x.
      *

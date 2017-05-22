@@ -60,9 +60,14 @@
     "babelify": "^7.3.0",
     "bit-twiddle": "^1.0.2",
     "earcut": "^2.0.7",
+<<<<<<< HEAD
+    "eventemitter3": "^2.0.0",
+    "ismobilejs": "^0.4.0",
+=======
     "eventemitter3": "^1.1.1",
     "glslify": "^5.0.2",
     "ismobilejs": "git+https://github.com/kaimallea/isMobile.git",
+>>>>>>> nobook_pixi
     "object-assign": "^4.0.1",
     "pixi-gl-core": "^1.0.3",
     "resource-loader": "^2.0.6"

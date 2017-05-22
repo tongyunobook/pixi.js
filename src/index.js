@@ -15,6 +15,7 @@ import * as loaders from './loaders';
 import * as mesh from './mesh';
 import * as particles from './particles';
 import * as prepare from './prepare';
+import EventEmitter from 'eventemitter3';
 
 // handle mixins now, after all code has been added, including deprecation
 import { utils } from './core';
@@ -32,6 +33,7 @@ export {
     prepare,
 };
 
+
 /**
  * A premade instance of the loader that can be used to load resources.
  *
@@ -45,3 +47,5 @@ export { loader };
 
 // Always export pixi globally.
 global.PIXI = exports; // eslint-disable-line
+// add eventEmitter
+PIXI.EventEmitter   = EventEmitter;

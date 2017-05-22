@@ -54,6 +54,12 @@ export default class InteractionEvent
      */
     stopPropagation()
     {
+        console.error('需要处理该方法和stopImmediatePropagation')
+        this.stopped = true;
+    }
+
+    stopImmediatePropagation() {
+        this.stopImmediate = true;
         this.stopped = true;
     }
 
@@ -65,6 +71,8 @@ export default class InteractionEvent
     _reset()
     {
         this.stopped = false;
+        this.stopImmediate = true;
+        this.captureComplete = false;
         this.currentTarget = null;
         this.target = null;
     }

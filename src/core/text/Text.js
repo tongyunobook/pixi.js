@@ -325,6 +325,9 @@ export default class Text extends Sprite
             currentPosition += this.context.measureText(current).width + letterSpacing;
         }
     }
+    if (!isNaN(style.wordWrapWidth)) {
+        maxLineWidth = Math.max(maxLineWidth, style.wordWrapWidth);
+    }
 
     /**
      * Updates texture size based on canvas size

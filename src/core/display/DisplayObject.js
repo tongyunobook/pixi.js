@@ -7,6 +7,8 @@ import Bounds from './Bounds';
 import { Rectangle } from '../math';
 // _tempDisplayObjectParent = new DisplayObject();
 
+var prefix = typeof Object.create !== 'function' ? '~' : false;
+
 /**
  * The base class for all objects that are rendered on the screen.
  * This is an abstract class and should not be used on its own rather it should be extended.
@@ -16,13 +18,11 @@ import { Rectangle } from '../math';
  * @mixes PIXI.interaction.interactiveTarget
  * @memberof PIXI
  */
-export default class DisplayObject extends EventEmitter
-{
+export default class DisplayObject extends EventEmitter {
     /**
      *
      */
-    constructor()
-    {
+    constructor() {
         super();
 
         const TransformClass = settings.TRANSFORM_MODE === TRANSFORM_MODE.STATIC ? TransformStatic : Transform;
@@ -122,16 +122,21 @@ export default class DisplayObject extends EventEmitter
          * @readonly
          */
         this._destroyed = false;
+
+
+        /**
+         * 是否允许获取bounds
+         * @type {boolean}
+         */
+        this.allowGetBounds = true;
     }
 
     /**
      * @private
      * @member {PIXI.DisplayObject}
      */
-    get _tempDisplayObjectParent()
-    {
-        if (this.tempDisplayObjectParent === null)
-        {
+    get _tempDisplayObjectParent() {
+        if (this.tempDisplayObjectParent === null) {
             this.tempDisplayObjectParent = new DisplayObject();
         }
 
@@ -143,8 +148,7 @@ export default class DisplayObject extends EventEmitter
      *
      * TODO - Optimization pass!
      */
-    updateTransform()
-    {
+    updateTransform() {
         this.transform.updateTransform(this.parent.transform);
         // multiply the alphas..
         this.worldAlpha = this.alpha * this.parent.worldAlpha;
@@ -156,15 +160,12 @@ export default class DisplayObject extends EventEmitter
      * recursively updates transform of all objects from the root to this one
      * internal function for toLocal()
      */
-    _recursivePostUpdateTransform()
-    {
-        if (this.parent)
-        {
+    _recursivePostUpdateTransform() {
+        if (this.parent) {
             this.parent._recursivePostUpdateTransform();
             this.transform.updateTransform(this.parent.transform);
         }
-        else
-        {
+        else {
             this.transform.updateTransform(this._tempDisplayObjectParent.transform);
         }
     }
@@ -178,32 +179,28 @@ export default class DisplayObject extends EventEmitter
      * @param {PIXI.Rectangle} rect - Optional rectangle to store the result of the bounds calculation
      * @return {PIXI.Rectangle} the rectangular bounding area
      */
-    getBounds(skipUpdate, rect)
-    {
-        if (!skipUpdate)
-        {
-            if (!this.parent)
-            {
+    getBounds(skipUpdate, rect) {
+        if (this.allowGetBounds === false) {
+            return math.Rectangle.EMPTY;
+        }
+        if (!skipUpdate) {
+            if (!this.parent) {
                 this.parent = this._tempDisplayObjectParent;
                 this.updateTransform();
                 this.parent = null;
             }
-            else
-            {
+            else {
                 this._recursivePostUpdateTransform();
                 this.updateTransform();
             }
         }
 
-        if (this._boundsID !== this._lastBoundsID)
-        {
+        if (this._boundsID !== this._lastBoundsID) {
             this.calculateBounds();
         }
 
-        if (!rect)
-        {
-            if (!this._boundsRect)
-            {
+        if (!rect) {
+            if (!this._boundsRect) {
                 this._boundsRect = new Rectangle();
             }
 
@@ -219,18 +216,15 @@ export default class DisplayObject extends EventEmitter
      * @param {PIXI.Rectangle} [rect] - Optional rectangle to store the result of the bounds calculation
      * @return {PIXI.Rectangle} the rectangular bounding area
      */
-    getLocalBounds(rect)
-    {
+    getLocalBounds(rect) {
         const transformRef = this.transform;
         const parentRef = this.parent;
 
         this.parent = null;
         this.transform = this._tempDisplayObjectParent.transform;
 
-        if (!rect)
-        {
-            if (!this._localBoundsRect)
-            {
+        if (!rect) {
+            if (!this._localBoundsRect) {
                 this._localBoundsRect = new Rectangle();
             }
 
@@ -254,23 +248,19 @@ export default class DisplayObject extends EventEmitter
      * @param {boolean} [skipUpdate=false] - Should we skip the update transform.
      * @return {PIXI.Point} A point object representing the position of this object
      */
-    toGlobal(position, point, skipUpdate = false)
-    {
-        if (!skipUpdate)
-        {
+    toGlobal(position, point, skipUpdate = false) {
+        if (!skipUpdate) {
             this._recursivePostUpdateTransform();
 
             // this parent check is for just in case the item is a root object.
             // If it is we need to give it a temporary parent so that displayObjectUpdateTransform works correctly
             // this is mainly to avoid a parent check in the main loop. Every little helps for performance :)
-            if (!this.parent)
-            {
+            if (!this.parent) {
                 this.parent = this._tempDisplayObjectParent;
                 this.displayObjectUpdateTransform();
                 this.parent = null;
             }
-            else
-            {
+            else {
                 this.displayObjectUpdateTransform();
             }
         }
@@ -289,28 +279,23 @@ export default class DisplayObject extends EventEmitter
      * @param {boolean} [skipUpdate=false] - Should we skip the update transform
      * @return {PIXI.Point} A point object representing the position of this object
      */
-    toLocal(position, from, point, skipUpdate)
-    {
-        if (from)
-        {
+    toLocal(position, from, point, skipUpdate) {
+        if (from) {
             position = from.toGlobal(position, point, skipUpdate);
         }
 
-        if (!skipUpdate)
-        {
+        if (!skipUpdate) {
             this._recursivePostUpdateTransform();
 
             // this parent check is for just in case the item is a root object.
             // If it is we need to give it a temporary parent so that displayObjectUpdateTransform works correctly
             // this is mainly to avoid a parent check in the main loop. Every little helps for performance :)
-            if (!this.parent)
-            {
+            if (!this.parent) {
                 this.parent = this._tempDisplayObjectParent;
                 this.displayObjectUpdateTransform();
                 this.parent = null;
             }
-            else
-            {
+            else {
                 this.displayObjectUpdateTransform();
             }
         }
@@ -345,10 +330,8 @@ export default class DisplayObject extends EventEmitter
      * @param {PIXI.Container} container - The Container to add this DisplayObject to
      * @return {PIXI.Container} The Container that this DisplayObject was added to
      */
-    setParent(container)
-    {
-        if (!container || !container.addChild)
-        {
+    setParent(container) {
+        if (!container || !container.addChild) {
             throw new Error('setParent: Argument must be a Container');
         }
 
@@ -371,8 +354,7 @@ export default class DisplayObject extends EventEmitter
      * @param {number} [pivotY=0] - The Y pivot value
      * @return {PIXI.DisplayObject} The DisplayObject instance
      */
-    setTransform(x = 0, y = 0, scaleX = 1, scaleY = 1, rotation = 0, skewX = 0, skewY = 0, pivotX = 0, pivotY = 0)
-    {
+    setTransform(x = 0, y = 0, scaleX = 1, scaleY = 1, rotation = 0, skewX = 0, skewY = 0, pivotX = 0, pivotY = 0) {
         this.position.x = x;
         this.position.y = y;
         this.scale.x = !scaleX ? 1 : scaleX;
@@ -393,11 +375,9 @@ export default class DisplayObject extends EventEmitter
      * after calling `destroy`.
      *
      */
-    destroy()
-    {
+    destroy() {
         this.removeAllListeners();
-        if (this.parent)
-        {
+        if (this.parent) {
             this.parent.removeChild(this);
         }
         this.transform = null;
@@ -422,8 +402,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {number}
      */
-    get x()
-    {
+    get x() {
         return this.position.x;
     }
 
@@ -438,8 +417,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {number}
      */
-    get y()
-    {
+    get y() {
         return this.position.y;
     }
 
@@ -454,8 +432,7 @@ export default class DisplayObject extends EventEmitter
      * @member {PIXI.Matrix}
      * @readonly
      */
-    get worldTransform()
-    {
+    get worldTransform() {
         return this.transform.worldTransform;
     }
 
@@ -465,8 +442,7 @@ export default class DisplayObject extends EventEmitter
      * @member {PIXI.Matrix}
      * @readonly
      */
-    get localTransform()
-    {
+    get localTransform() {
         return this.transform.localTransform;
     }
 
@@ -476,8 +452,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {PIXI.Point|PIXI.ObservablePoint}
      */
-    get position()
-    {
+    get position() {
         return this.transform.position;
     }
 
@@ -492,8 +467,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {PIXI.Point|PIXI.ObservablePoint}
      */
-    get scale()
-    {
+    get scale() {
         return this.transform.scale;
     }
 
@@ -508,8 +482,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {PIXI.Point|PIXI.ObservablePoint}
      */
-    get pivot()
-    {
+    get pivot() {
         return this.transform.pivot;
     }
 
@@ -524,8 +497,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {PIXI.ObservablePoint}
      */
-    get skew()
-    {
+    get skew() {
         return this.transform.skew;
     }
 
@@ -539,8 +511,7 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {number}
      */
-    get rotation()
-    {
+    get rotation() {
         return this.transform.rotation;
     }
 
@@ -555,14 +526,12 @@ export default class DisplayObject extends EventEmitter
      * @member {boolean}
      * @readonly
      */
-    get worldVisible()
-    {
+    get worldVisible() {
         let item = this;
 
         do
         {
-            if (!item.visible)
-            {
+            if (!item.visible) {
                 return false;
             }
 
@@ -582,43 +551,448 @@ export default class DisplayObject extends EventEmitter
      *
      * @member {PIXI.Graphics|PIXI.Sprite}
      */
-    get mask()
-    {
+    get mask() {
         return this._mask;
     }
 
     set mask(value) // eslint-disable-line require-jsdoc
     {
-        if (this._mask)
-        {
+        if (this._mask) {
             this._mask.renderable = true;
         }
 
         this._mask = value;
 
-        if (this._mask)
-        {
+        if (this._mask) {
             this._mask.renderable = false;
         }
     }
 
     /**
-     * Sets the filters for the displayObject.
-     * * IMPORTANT: This is a webGL only feature and will be ignored by the canvas renderer.
-     * To remove filters simply set this property to 'null'
-     *
-     * @member {PIXI.Filter[]}
+     * 添加一个事件监听器
      */
-    get filters()
-    {
-        return this._filters && this._filters.slice();
+    addEventListener() {
+        this.interactive = true;
+        this.on.apply(this, arguments);
     }
 
-    set filters(value) // eslint-disable-line require-jsdoc
-    {
-        this._filters = value && value.slice();
+    /**
+     * 发送消息
+     */
+    dispatchEvent() {
+        this.emit.apply(this, arguments);
+    }
+
+    /**
+     * Hit test
+     * @param dis {PIXI.DisplayObject}
+     * @return {boolean}
+     */
+    hitTest(dis) {
+        var conf = this;
+        var localBoundsA = this.getLocalBounds().clone();
+        var localBoundsB = dis.getLocalBounds().clone();
+        this.updateTransform();
+        dis.updateTransform();
+        var rect1 = this.getBounds();
+        var rect2 = dis.getBounds();
+        // 矩形R1的4个顶点
+        var r1TL = this.toGlobal({x: localBoundsA.x, y: localBoundsA.y});
+        var r1TR = this.toGlobal({x: localBoundsA.x + localBoundsA.width, y: localBoundsA.y});
+        var r1BL = this.toGlobal({x: localBoundsA.x, y: localBoundsA.y + localBoundsA.height});
+        var r1BR = this.toGlobal({x: localBoundsA.x + localBoundsA.width, y: localBoundsA.y + localBoundsA.height});
+        // 矩形R2的4个顶点
+        var r2TL = dis.toGlobal({x: localBoundsB.x, y: localBoundsB.y});
+        var r2TR = dis.toGlobal({x: localBoundsB.x + localBoundsB.width, y: localBoundsB.y});
+        var r2BL = dis.toGlobal({x: localBoundsB.x, y: localBoundsB.y + localBoundsB.height});
+        var r2BR = dis.toGlobal({x: localBoundsB.x + localBoundsB.width, y: localBoundsB.y + localBoundsB.height});
+
+        //求交点
+        function intersectPoint (a, b, c, d) {
+            /** 1 解线性方程组, 求线段交点. **/
+                // 如果分母为0 则平行或共线, 不相交
+            var denominator = (b.y - a.y)*(d.x - c.x) - (a.x - b.x)*(c.y - d.y);
+            if (denominator==0) {
+                return false;
+            }
+
+            // 线段所在直线的交点坐标 (x , y)
+            var x = ( (b.x - a.x) * (d.x - c.x) * (c.y - a.y) + (b.y - a.y) * (d.x - c.x) * a.x - (d.y - c.y) * (b.x - a.x) * c.x ) / denominator ;
+            var y = -( (b.y - a.y) * (d.y - c.y) * (c.x - a.x) + (b.x - a.x) * (d.y - c.y) * a.y - (d.x - c.x) * (b.y - a.y) * c.y ) / denominator;
+
+            //因为算出 x y 有误差 导致最终结果 出现问题 用num处理误差
+            var num = 0.000001;
+
+            /** 2 判断交点是否在两条线段上 **/
+            if (// 交点在线段1上
+            (x - a.x) * (x - b.x) <= num && (y - a.y) * (y - b.y) <= num
+            // 且交点也在线段2上
+            && (x - c.x) * (x - d.x) <= num && (y - c.y) * (y - d.y) <= num
+            ){
+                // 返回交点p
+                return {
+                    x : x,
+                    y : y
+                }
+            }
+            //否则不相交
+            return false
+        }
+
+        //判断是否相交
+        function check() {
+            var arr0 = [r1TL, r1TR, r1BR, r1BL];
+            var arr1 = [r2TL, r2TR, r2BR, r2BL];
+            // var arr0 = rectPoint(conf, globalA, localBoundsA);
+            // var arr1 = rectPoint(dis, globalB, localBoundsB);
+            for (var i = 0; i < arr0.length; i++) {
+                var a0 = arr0[i];
+                var a1 = arr0[(i + 1) % arr0.length];
+                for (var j = 0; j < arr1.length; j++) {
+                    var b0 = arr1[j];
+                    var b1 = arr1[(j + 1) % arr1.length];
+                    if (intersectPoint(a0, a1, b0, b1)) {
+                        //throw intersectPoint (a0, a1, b0, b1)
+                        intersectPoint(a0, a1, b0, b1);
+                        return true;
+                    }
+                }
+
+            }
+            for (var i = 0; i < arr0.length; i++) {
+                if (containsPoint(arr1, arr0[i])) {
+                    return true;
+                }
+            }
+            for (var i = 0; i < arr1.length; i++) {
+                if (containsPoint(arr0, arr1[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        //点在矩形内
+        function containsPoint(vs, p) {
+            var x = p.x;
+            var y = p.y;
+            var inside = false;
+            for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+                var xi = vs[i].x, yi = vs[i].y;
+                var xj = vs[j].x, yj = vs[j].y;
+
+                var intersect = ((yi > y) != (yj > y))
+                    && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        return check();
+    }
+
+    /**
+     * Hit test point
+     * @param p
+     * @returns {boolean}
+     */
+    hitTestPoint(p) {
+        var g = this.getBounds();
+        return g.contains(p.x, p.y);
     }
 }
+
+
+/**
+ * 是否有eventType方法
+ * @param eventType 事件类型
+ */
+DisplayObject.prototype.has = EventEmitter.prototype.hasEventListener = function(eventType) {
+    var evt = prefix ? prefix + eventType : eventType;
+    if (!this._events || !this._events[evt]) {
+        return false;
+    }
+    return true;
+}
+
+function EE(fn, context, once) {
+    this.fn = fn;
+    this.context = context;
+    this.once = once || false;
+    // 默认不使用冒泡
+    this.bubble = false;
+    // 默认捕获为false
+    this.capture = false;
+}
+
+// 重写emit方法
+DisplayObject.prototype.emit = function(event, a1, a2, a3, a4, a5) {
+    var evt = prefix ? prefix + event : event;
+
+    // 设置a1的默认值
+    if (a1 && a1.capture === undefined) {
+        a1.capture = false;
+    }
+
+    if (!this._events || !this._events[evt]) return false;
+
+    var listeners = this._events[evt]
+        , len = arguments.length
+        , args
+        , i;
+
+    if ('function' === typeof listeners.fn) {
+        if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
+
+        /*
+        switch (len) {
+            case 1: return listeners.fn.call(listeners.context), true;
+            case 2: return listeners.fn.call(listeners.context, a1), true;
+            case 3: return listeners.fn.call(listeners.context, a1, a2), true;
+            case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
+            case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
+            case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
+        }
+        */
+        if (a1 !== undefined) {
+            for (i = 1, args = []; i < len; i++) {
+                args[i - 1] = arguments[i];
+            }
+            if (listeners.capture === a1.capture || a1.capture === undefined) {
+                listeners.fn.apply(listeners.context, args);
+            }
+        } else {
+            listeners.fn.call(listeners.context);
+        }
+    } else {
+        var length = listeners.length
+            , j;
+
+        for (i = 0; i < length; i++) {
+            if (listeners[i].once) {
+                this.removeListener(event, listeners[i].fn, undefined, true);
+            }
+            if (a1 && a1.stopImmediate === true) {
+                break;
+            }
+            if (a1 !== undefined) {
+                for (j = 1, args = []; j < len; j++) {
+                    args[j - 1] = arguments[j];
+                }
+                if (listeners[i].capture === a1.capture || a1.capture === undefined) {
+                    listeners[i].fn.apply(listeners[i].context, args);
+                }
+            } else {
+                listeners[i].fn.apply(listeners[i].context);
+            }
+        }
+    }
+
+    return true;
+}
+
+DisplayObject.prototype.once = function once(event, fn, context) {
+    var listener = new EE(fn, context || this, true)
+        , evt = prefix ? prefix + event : event;
+
+    if (!this._events) this._events = prefix ? {} : Object.create(null);
+    if (!this._events[evt]) this._events[evt] = listener;
+    else {
+        if (!this._events[evt].fn) this._events[evt].push(listener);
+        else this._events[evt] = [
+            this._events[evt], listener
+        ];
+    }
+
+    return this;
+};
+
+//准备覆盖方法on
+DisplayObject.prototype.$on = function on(event, fn, capture, priority) {
+    var listener = new EE(fn, this)
+        , evt = prefix ? prefix + event : event;
+    if (capture === undefined) {
+        capture = false;
+    }
+    listener.capture = capture;
+    listener.priority = priority || 0;
+
+    if (!this._events) {
+        this._events = prefix ? {} : Object.create(null);
+    }
+    if (!this._events[evt]) {
+        this._events[evt] = listener;
+    } else {
+        var eventAry = this._events[evt];
+        if (!eventAry.fn) {
+            for (var i = 0; i < eventAry.length; i ++) {
+                var e = eventAry[i];
+                if (e.fn === fn) {
+                    break;
+                }
+            }
+            if (i === eventAry.length) {
+                eventAry.push(listener);
+            }
+        } else {
+            if (eventAry.fn !== listener.fn) {
+                eventAry = [
+                    eventAry, listener
+                ];
+                this._events[evt] = eventAry;
+            }
+        }
+        if (eventAry instanceof Array) {
+            eventAry.sort(function(a, b) {
+                return b.priority - a.priority;
+            });
+        }
+    }
+
+    return this;
+};
+
+
+DisplayObject.prototype.on = function on(event, fn, capture, priority) {
+    if (event === TouchEvent.TOUCH_BEGIN) {
+        this.$on('mousedown', fn, capture, priority);
+        this.$on('touchstart', fn, capture, priority);
+        return this;
+    } else if (event === TouchEvent.TOUCH_MOVE) {
+        this.$on('mousemove', fn, capture, priority);
+        this.$on('touchmove', fn, capture, priority);
+        return this;
+    } else if (event === TouchEvent.TOUCH_END) {
+        this.$on('mouseup', fn, capture, priority);
+        this.$on('touchend', fn, capture, priority);
+        return this;
+    } else if (event === TouchEvent.TAP) {
+        this.$on('click', fn, capture, priority);
+        this.$on('tap', fn, capture, priority);
+        return this;
+    } else if (event === TouchEvent.TOUCH_END_OUDSIDE) {
+        this.$on('mouseupoutside', fn, capture, priority);
+        this.$on('touchendoutside', fn, capture, priority);
+        return this;
+    }
+    this.$on(event, fn, capture, priority);
+}
+
+DisplayObject.prototype.$removeListener = function(event, fn, capture, once) {
+    var evt = prefix ? prefix + event : event;
+    if (!this._events || !this._events[evt]) return this;
+    var listeners = this._events[evt]
+        , events = [];
+
+    if (fn) {
+        if (listeners.fn) {
+            if (
+                listeners.fn !== fn
+                || (once && !listeners.once)
+                || (!listeners.capture === capture)
+            ) {
+                events.push(listeners);
+            }
+        } else {
+            for (var i = 0, length = listeners.length; i < length; i++) {
+                if (
+                    listeners[i].fn !== fn
+                    || (once && !listeners[i].once)
+                    || (!listeners[i].capture === capture)
+                ) {
+                    events.push(listeners[i]);
+                }
+            }
+        }
+    } else {
+        //添加return，避免全部被删除
+        return;
+    }
+
+    //
+    // Reset the array, or remove it completely if we have no more listeners.
+    //
+    if (events.length) {
+        this._events[evt] = events.length === 1 ? events[0] : events;
+    } else {
+        delete this._events[evt];
+    }
+
+    return this;
+}
+
+DisplayObject.prototype.removeEventListener = DisplayObject.prototype.removeListener = function removeListener(event, fn, context, once) {
+    if (event === TouchEvent.TOUCH_BEGIN) {
+        this.$removeListener('mousedown', fn, context, once);
+        this.$removeListener('touchstart', fn, context, once);
+        return;
+    } else if (event === TouchEvent.TOUCH_MOVE) {
+        this.$removeListener('mousemove', fn, context, once);
+        this.$removeListener('touchmove', fn, context, once);
+        return;
+    } else if (event === TouchEvent.TOUCH_END) {
+        this.$removeListener('mouseup', fn, context, once);
+        this.$removeListener('touchend', fn, context, once);
+        return;
+    } else if (event === TouchEvent.TAP) {
+        this.$removeListener('click', fn, context, once);
+        this.$removeListener('tap', fn, context, once);
+        return;
+    } else if (event === TouchEvent.TOUCH_END_OUDSIDE) {
+        this.$removeListener('mouseupoutside', fn, context, once);
+        this.$removeListener('touchendoutside', fn, context, once);
+        return;
+    }
+    this.$removeListener(event, fn, context, once);
+}
+
+/**
+ * 获取根节点
+ */
+Object.defineProperty(DisplayObject.prototype, 'root', {
+    get : function() {
+        if (this._root_ === undefined) {
+            var _root = this;
+            while (true) {
+                if (_root.parent === null) {
+                    this._root_ = _root;
+                    break;
+                }
+                _root = _root.parent;
+            }
+        }
+        return this._root_;
+    },
+
+    set : function(value) {
+        this._root_ = value;
+    }
+});
+
+/**
+ * 获取当前容器所在的BaseEquipment容器
+ */
+Object.defineProperty(DisplayObject.prototype, 'currentEquipment', {
+    get : function() {
+        if (this._currentEq_ === undefined) {
+            if (window.chemical === undefined) {
+                return undefined;
+            }
+            var eq = this;
+            while (eq) {
+                if (eq instanceof chemical.core.BaseEquipment) {
+                    this._currentEq_ = eq;
+                    return eq;
+                }
+                eq = eq.parent;
+            }
+        }
+        return this._currentEq_;
+    },
+    set : function(c) {
+        this._currentEq_ = c;
+    }
+});
 
 // performance increase to avoid using call.. (10x faster)
 DisplayObject.prototype.displayObjectUpdateTransform = DisplayObject.prototype.updateTransform;

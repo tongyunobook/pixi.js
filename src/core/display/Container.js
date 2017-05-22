@@ -1,6 +1,8 @@
 import { removeItems } from '../utils';
 import DisplayObject from './DisplayObject';
 
+Container.RootClass = Container;
+
 /**
  * A Container represents a collection of display objects.
  * It is the base class of all display objects that act as a container for other objects.
@@ -40,6 +42,29 @@ export default class Container extends DisplayObject
     onChildrenChange()
     {
         /* empty */
+    }
+
+
+
+    /**
+     * 添加孩子到容器当中，并且保持孩子的相对于全局坐标的位置
+     */
+    addChildWithSamePos(child) {
+        var p = this.toLocal({x:0, y:0}, child);
+        child.x = p.x;
+        child.y = p.y;
+        this.addChild(child);
+    }
+
+    /**
+     * 添加孩子到容器当中，并且保持孩子的相对于全局坐标的位置
+     * @param child
+     */
+    addChildAtWithSamePos(child, index) {
+        var p = this.toLocal({x:0, y:0}, child);
+        child.x = p.x;
+        child.y = p.y;
+        this.addChildAt(child, index);
     }
 
     /**
@@ -119,6 +144,13 @@ export default class Container extends DisplayObject
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.onChildrenChange(index);
+
+        if (this.root instanceof Container.RootClass) {
+            emitAddedToStage(child);
+        } else {
+            this.root = undefined;
+        }
+
         child.emit('added', this);
 
         return child;
@@ -262,6 +294,8 @@ export default class Container extends DisplayObject
 
         // TODO - lets either do all callbacks or all events.. not both!
         this.onChildrenChange(index);
+
+        emitRemovedFromStage(child);
         child.emit('removed', this);
 
         return child;
@@ -295,11 +329,12 @@ export default class Container extends DisplayObject
             }
 
             this._boundsID++;
-
             this.onChildrenChange(beginIndex);
+            emitRemovedFromStage(child);
 
             for (let i = 0; i < removed.length; ++i)
             {
+                emitRemovedFromStage(removed[i]);
                 removed[i].emit('removed', this);
             }
 
@@ -318,11 +353,20 @@ export default class Container extends DisplayObject
      */
     updateTransform()
     {
+        if (!this.visible)
+        {
+            return;
+        }
+
+        if (!this.parent)
+        {
+            return;
+        }
+
         this._boundsID++;
 
         this.transform.updateTransform(this.parent.transform);
 
-        // TODO: check render flags, how to process stuff here
         this.worldAlpha = this.alpha * this.parent.worldAlpha;
 
         for (let i = 0, j = this.children.length; i < j; ++i)
@@ -613,7 +657,58 @@ export default class Container extends DisplayObject
 
         this._height = value;
     }
+
+    /**
+     * 克隆对象
+     */
+    clone() {
+        if (this._nbData_ !== undefined) {
+            var n = this.name;
+            var dis = this.root.createChildFromData(this.parent, this._nbData_,  this._textureMapName_);
+            if (n) {
+                this.parent[n] = this;
+            }
+            return dis;
+        } else {
+            console.warn('无法克隆');
+            return null;
+        }
+    }
+
 }
 
+Container.prototype.containerGetBounds = Container.prototype.getBounds;
 // performance increase to avoid using call.. (10x faster)
 Container.prototype.containerUpdateTransform = Container.prototype.updateTransform;
+
+
+/**
+ * 派发添加到舞台的消息
+ */
+function emitAddedToStage(c) {
+    if (c instanceof Container) {
+        c.emit('addedToStage');
+        c.children.map(function(_c) {
+            emitAddedToStage(_c);
+        });
+    } else {
+        c.emit('addedToStage');
+    }
+}
+
+/**
+ * 当移除到舞台的时候发出
+ * @param c
+ */
+function emitRemovedFromStage(c) {
+    if (c instanceof Container) {
+        c.emit('removedFromStage');
+        c.children.map(function(_c) {
+            emitRemovedFromStage(_c);
+        });
+    } else {
+        c.emit('removedFromStage');
+        // 移除root
+        c.root = undefined;
+    }
+}

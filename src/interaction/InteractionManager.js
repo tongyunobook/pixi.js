@@ -763,7 +763,7 @@ export default class InteractionManager extends EventEmitter
      * @param {boolean} [interactive] - Whether the displayObject is interactive
      * @return {boolean} returns true if the displayObject hit the point
      */
-    processInteractive(interactionEvent, displayObject, func, hitTest, interactive)
+    processInteractive(interactionEvent, displayObject, func, hitTest, interactive, touchData)
     {
         if (!displayObject || !displayObject.visible)
         {
@@ -816,7 +816,7 @@ export default class InteractionManager extends EventEmitter
                 const child = children[i];
 
                 // time to get recursive.. if this function will return if something is hit..
-                const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent);
+                const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent, touchData);
 
                 if (childHit)
                 {
@@ -880,6 +880,10 @@ export default class InteractionManager extends EventEmitter
                 {
                     interactionEvent.target = displayObject;
                 }
+
+                console.error('可能程序会出问题!!!');
+                // func(displayObject, hit, touchData);
+                // 原来的方法如上
 
                 func(interactionEvent, displayObject, !!hit);
             }
@@ -1087,6 +1091,14 @@ export default class InteractionManager extends EventEmitter
         const id = interactionEvent.data.identifier;
 
         const trackingData = displayObject.trackedPointers[id];
+// =======
+        if(hit)
+        {
+            this.captureFunc(isRightButton ? 'rightdown' : 'mousedown', displayObject);
+            displayObject[ isRightButton ? '_isRightDown' : '_isLeftDown' ] = true;
+            this.dispatchEvent( displayObject, isRightButton ? 'rightdown' : 'mousedown', this.eventData );
+        }
+// >>>>>>> nobook_pixi
 
         const isTouch = (e.type === 'touchend' || e.pointerType === 'touch');
 
@@ -1169,6 +1181,12 @@ export default class InteractionManager extends EventEmitter
     onPointerMove(originalEvent)
     {
         const events = this.normalizeToPointerData(originalEvent);
+        // nobook
+        this.mouse.originalEvent = event;
+        this.eventData.data = this.mouse;
+        this.eventData.stopped = false;
+        this.eventData.stopImmediate = false;
+        this.eventData.captureComplete = false;
 
         if (events[0].pointerType === 'mouse')
         {
@@ -1205,7 +1223,6 @@ export default class InteractionManager extends EventEmitter
         if (events[0].pointerType === 'mouse')
         {
             this.setCursorMode(this.cursor);
-
             // TODO BUG for parents interactive object (border order issue)
         }
     }
@@ -1339,6 +1356,65 @@ export default class InteractionManager extends EventEmitter
             }
         }
     }
+
+    /**
+     * 捕获方法
+     * @param type 事件类型
+     * @param displayObject 事件对象
+     */
+    InteractionManager.prototype.captureFunc = function(type, displayObject) {
+        // cacpture
+        if (this.eventData && this.eventData.captureComplete === false) {
+            var captureAry = [displayObject];
+            var dis = displayObject.parent;
+            while (true) {
+                if (dis) {
+                    //if (dis.interactive || (dis.dragArea && dis.dragArea.interactive)) {
+                    captureAry.push(dis);
+                    //}
+                } else {
+                    break;
+                }
+                dis = dis.parent;
+            }
+            // 设置捕获为true
+            this.eventData.capture = true;
+            for (var i = captureAry.length - 1; i >= 0; i --) {
+                var dis = captureAry[i];
+                // 事件流停止
+                if (this.eventData.stopImmediate) {
+                    break;
+                }
+                this.dispatchEvent( dis, type, this.eventData );
+            }
+            this.eventData.captureComplete = true;
+            // 还原捕获
+            this.eventData.capture = false;
+        }
+    }
+
+    /**
+     * Processes the result of a touch check and dispatches the event if need be
+     *
+     * @param displayObject {PIXI.Container|PIXI.Sprite|PIXI.extras.TilingSprite} The display object that was tested
+     * @param hit {boolean} the result of the hit test on the display object
+     * @private
+     */
+    InteractionManager.prototype.processTouchStart = function ( displayObject, hit, touchData )
+    {
+        if(hit)
+        {
+            //displayObject._touchDown = true;
+            if (displayObject._touchID === undefined) {
+                displayObject._touchID = {};
+            }
+            // cacpture
+            this.captureFunc('touchstart', displayObject);
+
+            displayObject._touchID[touchData.identifier] = true;
+            this.dispatchEvent( displayObject, 'touchstart', this.eventData );
+        }
+    };
 
     /**
      * Is called when the pointer is moved into the renderer element

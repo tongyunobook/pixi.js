@@ -130,6 +130,71 @@ export default class Rectangle
     }
 
     /**
+     * 两个矩形的并集
+     * @param rectangle 另外一个需要求并集的矩形
+     * @return {PIXI.Rectangle} 返回当前对象
+     */
+    union(rectangle) {
+        var topX = Math.min(this.x, rectangle.x);
+        var topY = Math.min(this.y, rectangle.y);
+
+        var bottomX = Math.max(this.x + this.width, rectangle.x + rectangle.width);
+        var bottomY = Math.max(this.y + this.height, rectangle.y + rectangle.height);
+
+        var width = bottomX - topX;
+        var height = bottomY - topY;
+
+        this.x = topX;
+        this.y = topY;
+        this.width = width;
+        this.height = height;
+
+        return this;
+    }
+
+
+    /**
+     * 两个矩形的交集
+     * @param rect 另外一个矩形
+     * @return {PIXI.Rectangle} 返回当前对象
+     */
+    intersection(rectangle) {
+        var topX = Math.max(this.x, rectangle.x);
+        var topY = Math.max(this.y, rectangle.y);
+
+        var bottomX = Math.min(this.x + this.width, rectangle.x + rectangle.width);
+        var bottomY = Math.min(this.y + this.height, rectangle.y + rectangle.height);
+
+        var width = bottomX - topX;
+        var height = bottomY - topY;
+
+        this.x = topX;
+        this.y = topY;
+        this.width = width;
+        this.height = height;
+
+        return this;
+    }
+
+    /**
+     * 两个矩形是否相交
+     * @param rectangle
+     * @returns {boolean}
+     */
+    intersect(rectangle) {
+        var topX = Math.max(this.x, rectangle.x);
+        var topY = Math.max(this.y, rectangle.y);
+
+        var bottomX = Math.min(this.x + this.width, rectangle.x + rectangle.width);
+        var bottomY = Math.min(this.y + this.height, rectangle.y + rectangle.height);
+
+        var width = bottomX - topX;
+        var height = bottomY - topY;
+
+        return width >= 0 && height >= 0;
+    }
+
+    /**
      * Checks whether the x and y coordinates given are contained within this Rectangle
      *
      * @param {number} x - The X coordinate of the point to test
