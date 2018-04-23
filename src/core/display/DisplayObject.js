@@ -429,6 +429,69 @@ export default class DisplayObject extends EventEmitter
         this._destroyed = true;
     }
 
+    
+    /**
+     * 添加事件监听器
+     */
+    addEventListener() {
+        this.interactive = true;
+        this.on.apply(this, arguments);
+    }
+
+    /**
+     * 发送消息
+     */
+    dispatchEvent() {
+        this.emit.apply(this, arguments);
+    }
+
+
+
+    /**
+     * 获取根节点
+     */
+    get root() {
+        if (this._root_ === undefined) {
+            var _root = this;
+            while (true) {
+                if (_root.parent === null) {
+                    this._root_ = _root;
+                    break;
+                }
+                _root = _root.parent;
+            }
+        }
+        return this._root_;
+    }
+
+    set root(value) {
+        this._root_ = value;
+    }
+
+    /**
+     * 获取当前容器所在的BaseEquipment容器
+     */
+    get currentEquipment() {
+        if (this._currentEq_ === undefined) {
+            if (window.chemical === undefined) {
+                return undefined;
+            }
+            var eq = this;
+            while (eq) {
+                if (eq instanceof chemical.core.BaseEquipment) {
+                    this._currentEq_ = eq;
+                    return eq;
+                }
+                eq = eq.parent;
+            }
+        }
+        return this._currentEq_;
+    }
+
+    set currentEquipment(c) {
+        this._currentEq_ = c;
+    }
+
     /**
      * The position of the displayObject on the x axis relative to the local coordinates of the parent.
      * An alias to position.x
