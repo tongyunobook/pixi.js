@@ -987,7 +987,7 @@ export default class InteractionManager extends EventEmitter
      * @param {boolean} [interactive] - Whether the displayObject is interactive
      * @return {boolean} returns true if the displayObject hit the point
      */
-    processInteractive(interactionEvent, displayObject, func, hitTest, interactive)
+    processInteractive(interactionEvent, displayObject, func, hitTest, interactive, touchData)
     {
         if (!displayObject || !displayObject.visible)
         {
@@ -1061,7 +1061,7 @@ export default class InteractionManager extends EventEmitter
                 const child = children[i];
 
                 // time to get recursive.. if this function will return if something is hit..
-                const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent);
+                const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent, touchData);
 
                 if (childHit)
                 {

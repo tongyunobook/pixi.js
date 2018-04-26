@@ -202,7 +202,20 @@ export default class Ticker
      */
     add(fn, context, priority = UPDATE_PRIORITY.NORMAL)
     {
+        if (this.has(fn)) {
+            return;
+        }
         return this._addListener(new TickerListener(fn, context, priority));
+    }
+
+
+    /***
+     * 是否包含某个方法
+     * @param fn
+     * @returns {*}
+     */
+    has(fn) {
+        console.error('TODO: 4.7.3 ticker方法已经重构，需要重新实现has方法！');
     }
 
     /**

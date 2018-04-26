@@ -70,4 +70,15 @@ export default class Point
         this.y = y || ((y !== 0) ? this.x : 0);
     }
 
+    /**
+     * Get the distance between two points.
+     * @param a
+     * @param b
+     * @returns {number}
+     */
+    distance(a, b) {
+        var x = a.x - b.x;
+        var y = a.y - b.y;
+        return Math.sqrt(x * x + y * y);
+    }
 }

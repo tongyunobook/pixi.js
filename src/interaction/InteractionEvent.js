@@ -57,12 +57,18 @@ export default class InteractionEvent
         this.stopped = true;
     }
 
+    stopImmediatePropagation() {
+        this.stopImmediate = true;
+        this.stopped = true;
+    }
+
     /**
      * Resets the event.
      */
     reset()
     {
         this.stopped = false;
+        this.stopImmediate = false;
         this.currentTarget = null;
         this.target = null;
     }
