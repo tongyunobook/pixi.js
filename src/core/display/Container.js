@@ -83,6 +83,11 @@ export default class Container extends DisplayObject
 
             // TODO - lets either do all callbacks or all events.. not both!
             this.onChildrenChange(this.children.length - 1);
+            if (this.root instanceof Container.RootClass) {
+                emitAddedToStage(child);
+            } else {
+                this.root = undefined;
+            }
             child.emit('added', this);
         }
 
@@ -241,6 +246,7 @@ export default class Container extends DisplayObject
 
             // TODO - lets either do all callbacks or all events.. not both!
             this.onChildrenChange(index);
+            emitRemovedFromStage(child);
             child.emit('removed', this);
         }
 
@@ -326,7 +332,6 @@ export default class Container extends DisplayObject
             this._boundsID++;
 
             this.onChildrenChange(beginIndex);
-            emitRemovedFromStage(child);
 
             for (let i = 0; i < removed.length; ++i)
             {

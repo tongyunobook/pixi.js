@@ -479,7 +479,7 @@ export default class DisplayObject extends EventEmitter
         var r2TL = dis.toGlobal({x: localBoundsB.x, y: localBoundsB.y});
         var r2TR = dis.toGlobal({x: localBoundsB.x + localBoundsB.width, y: localBoundsB.y});
         var r2BL = dis.toGlobal({x: localBoundsB.x, y: localBoundsB.y + localBoundsB.height});
-        var r2BR = dis.toGlobal({x: localBoundsB.x + localBoundsB.width, y: localBoundsB.y + ocalBoundsB.height});
+        var r2BR = dis.toGlobal({x: localBoundsB.x + localBoundsB.width, y: localBoundsB.y + localBoundsB.height});
 
         //求交点
         function intersectPoint (a, b, c, d) {
