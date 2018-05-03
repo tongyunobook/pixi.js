@@ -1166,10 +1166,14 @@ export default class InteractionManager extends EventEmitter
             const interactionEvent = this.configureInteractionEventForDOMEvent(this.eventData, event, interactionData);
 
             interactionEvent.data.originalEvent = originalEvent;
+            const isRightButton = event.button === 2;
 
-            this.processInteractive(interactionEvent, this.renderer._lastObjectRendered, this.processPointerDown, true);
+            if (!isRightButton) {
+                this.processInteractive(interactionEvent, this.renderer._lastObjectRendered, this.processPointerDown, true);
+            }
 
             this.emit('pointerdown', interactionEvent);
+
             if (event.pointerType === 'touch')
             {
                 this.emit('touchstart', interactionEvent);
@@ -1177,8 +1181,6 @@ export default class InteractionManager extends EventEmitter
             // emit a mouse event for "pen" pointers, the way a browser would emit a fallback event
             else if (event.pointerType === 'mouse' || event.pointerType === 'pen')
             {
-                const isRightButton = event.button === 2;
-
                 this.emit(isRightButton ? 'rightdown' : 'mousedown', this.eventData);
             }
         }
