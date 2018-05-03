@@ -1205,6 +1205,7 @@ export default class InteractionManager extends EventEmitter
             {
                 displayObject.trackedPointers[id] = new InteractionTrackingData(id);
             }
+            this.captureEvent('pointerdown', displayObject);
             this.dispatchEvent(displayObject, 'pointerdown', interactionEvent);
 
             if (data.pointerType === 'touch')
@@ -1390,6 +1391,7 @@ export default class InteractionManager extends EventEmitter
         // Pointers and Touches, and Mouse
         if (hit)
         {
+            this.captureEvent('pointerup', displayObject);
             this.dispatchEvent(displayObject, 'pointerup', interactionEvent);
             if (isTouch) this.dispatchEvent(displayObject, 'touchend', interactionEvent);
 
@@ -1407,6 +1409,7 @@ export default class InteractionManager extends EventEmitter
         }
         else if (trackingData)
         {
+            this.captureEvent('pointerupoutside', displayObject);
             this.dispatchEvent(displayObject, 'pointerupoutside', interactionEvent);
             if (isTouch) this.dispatchEvent(displayObject, 'touchendoutside', interactionEvent);
         }
@@ -1493,6 +1496,7 @@ export default class InteractionManager extends EventEmitter
 
         if (!this.moveWhenInside || hit)
         {
+            this.captureEvent('pointermove', displayObject);
             this.dispatchEvent(displayObject, 'pointermove', interactionEvent);
             if (isTouch) this.dispatchEvent(displayObject, 'touchmove', interactionEvent);
             if (isMouse) this.dispatchEvent(displayObject, 'mousemove', interactionEvent);
@@ -1795,6 +1799,42 @@ export default class InteractionManager extends EventEmitter
         }
 
         return normalizedEvents;
+    }
+
+    /**
+     * 捕获事件
+     * @param type 事件类型
+     * @param displayObject 事件对象
+     */
+    captureEvent(type, displayObject) {
+        // cacpture
+        if (this.eventData && this.eventData.captureComplete === false) {
+            var captureAry = [displayObject];
+            var dis = displayObject.parent;
+            while (true) {
+                if (dis) {
+                    //if (dis.interactive || (dis.dragArea && dis.dragArea.interactive)) {
+                        captureAry.push(dis);
+                    //}
+                } else {
+                    break;
+                }
+                dis = dis.parent;
+            }
+            // 设置捕获为true
+            this.eventData.capture = true;
+            for (var i = captureAry.length - 1; i >= 0; i --) {
+                var dis = captureAry[i];
+                // 事件流停止
+                if (this.eventData.stopImmediate) {
+                    break;
+                }
+                this.dispatchEvent( dis, type, this.eventData );
+            }
+            this.eventData.captureComplete = true;
+            // 还原捕获
+            this.eventData.capture = false;
+        }
     }
 
     /**

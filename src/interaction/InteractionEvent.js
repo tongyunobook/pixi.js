@@ -71,5 +71,6 @@ export default class InteractionEvent
         this.stopImmediate = false;
         this.currentTarget = null;
         this.target = null;
+        this.captureComplete = false;
     }
 }
