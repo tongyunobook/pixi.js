@@ -398,7 +398,7 @@ export default class Container extends DisplayObject
         {
             const child = this.children[i];
 
-            if (!child.visible || !child.renderable)
+            if (!child.visible || !child.renderable || !child.allowGetBounds)
             {
                 continue;
             }
