@@ -160,6 +160,15 @@ export default function deprecation(core)
             },
         },
 
+        RopeBitmap: {
+            get()
+            {
+                warn('The RopeBitmap class has been moved to mesh.RopeBitmap, please use mesh.RopeBitmap from now on.');
+
+                return mesh.RopeBitmap;
+            },
+        },
+
         /**
          * @class
          * @private

@@ -39,7 +39,7 @@ export default class ObservablePoint
         {
             this._x = _x;
             this._y = _y;
-            this.cb.call(this.scope);
+            if(this.cb) this.cb.call(this.scope);
         }
     }
 
@@ -54,7 +54,7 @@ export default class ObservablePoint
         {
             this._x = point.x;
             this._y = point.y;
-            this.cb.call(this.scope);
+            if(this.cb) this.cb.call(this.scope);
         }
     }
 
@@ -73,7 +73,7 @@ export default class ObservablePoint
         if (this._x !== value)
         {
             this._x = value;
-            this.cb.call(this.scope);
+            if(this.cb) this.cb.call(this.scope);
         }
     }
 
@@ -92,7 +92,36 @@ export default class ObservablePoint
         if (this._y !== value)
         {
             this._y = value;
-            this.cb.call(this.scope);
+            if(this.cb) this.cb.call(this.scope);
         }
+    }
+
+    clone() {
+        return new ObservablePoint(null, null, this._x, this._y);
+    }
+
+    equals(p) {
+        return (p.x === this.x) && (p.y === this.y);
+    }
+
+    get length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+    }
+
+    add (v) {
+        return new ObservablePoint(null, null, this._x + v.x, this._y + v.y);
+    }
+
+    subtract (v) {
+        return new ObservablePoint(null, null, this._x - v.x, this._y - v.y);
+    }
+
+    sub(v) {
+        return this.subtract(v);
+    }
+
+    setTo (xa, ya) {
+        this.x = xa;
+        this.y = ya;
     }
 }
