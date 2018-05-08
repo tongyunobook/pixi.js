@@ -742,7 +742,7 @@ export default class DisplayObject extends EventEmitter
         var evt = prefix ? prefix + event : event;
 
         // 设置a1的默认值
-        if (a1 && a1.capture === undefined && typeof a1 === "object") {
+        if (a1 && a1.capture === undefined && (typeof a1 === "object" || typeof a1 === "function")) {
             a1.capture = false;
         }
 
