@@ -218,4 +218,17 @@ export default class Rope extends Mesh
         this.containerUpdateTransform();
     }
 
+    /**
+     * 设置rope的points并刷新
+     * @param points
+     */
+    setRopePoints(points) {
+        this.points = points;
+        this.vertices = new Float32Array(points.length * 4);
+        this.uvs = new Float32Array(points.length * 4);
+        this.colors = new Float32Array(points.length * 2);
+        this.indices = new Uint16Array(points.length * 2);
+        this._refresh(); // 兼容v4
+    }
+
 }

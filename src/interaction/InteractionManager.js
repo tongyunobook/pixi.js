@@ -931,6 +931,7 @@ export default class InteractionManager extends EventEmitter
         if (!eventData.stopped)
         {
             eventData.currentTarget = displayObject;
+            eventData.target = displayObject;
             eventData.type = eventString;
 
             displayObject.emit(eventString, eventData);
