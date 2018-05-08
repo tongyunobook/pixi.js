@@ -441,7 +441,7 @@ export default class DisplayObject extends EventEmitter
         this._destroyed = true;
     }
 
-    
+
     /**
      * 添加事件监听器
      */
@@ -742,7 +742,7 @@ export default class DisplayObject extends EventEmitter
         var evt = prefix ? prefix + event : event;
 
         // 设置a1的默认值
-        if (a1 && a1.capture === undefined) {
+        if (a1 && a1.capture === undefined && typeof a1 === "object") {
             a1.capture = false;
         }
 
