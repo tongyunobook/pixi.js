@@ -70,15 +70,21 @@ export default class Point
         this.y = y || ((y !== 0) ? this.x : 0);
     }
 
+    static interpolate(pt1, pt2, f) {
+        const xDis = (pt2.x - pt1.x);
+        const yDis = (pt2.y - pt1.y);
+        return new Point(pt1.x + (xDis * f), pt1.y + (yDis * f));
+    }
+
     /**
      * Get the distance between two points.
      * @param a
      * @param b
      * @returns {number}
      */
-    distance(a, b) {
-        var x = a.x - b.x;
-        var y = a.y - b.y;
+    static distance(a, b) {
+        const x = a.x - b.x;
+        const y = a.y - b.y;
         return Math.sqrt(x * x + y * y);
     }
 }

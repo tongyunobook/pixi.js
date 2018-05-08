@@ -1,5 +1,5 @@
 import Mesh from './Mesh';
-import core from '../core';
+import * as core from '../core';
 
 export default class RopeBitmap extends Mesh
 {
@@ -89,10 +89,14 @@ export default class RopeBitmap extends Mesh
         const indices = this.indices;
         const colors = this.colors;
 
-        uvs[0] = 0;
-        uvs[1] = 0;
-        uvs[2] = 0;
-        uvs[3] = 1;
+        let textureUvs = this._texture._uvs;
+        let offset = new core.Point(textureUvs.x0, textureUvs.y0);
+        let factor = new core.Point(textureUvs.x2 - textureUvs.x0, textureUvs.y2 - textureUvs.y0);
+
+        uvs[0] = 0 + offset.x;
+        uvs[1] = 0 + offset.y;
+        uvs[2] = 0 + offset.x;
+        uvs[3] = 1 * factor.y + offset.y;
 
         colors[0] = 1;
         colors[1] = 1;
