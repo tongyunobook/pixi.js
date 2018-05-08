@@ -167,10 +167,28 @@ export default class Container extends DisplayObject
 
         if (index === -1)
         {
-            throw new Error('The supplied DisplayObject must be a child of the caller');
+            // throw new Error('The supplied DisplayObject must be a child of the caller');
         }
 
         return index;
+    }
+
+    /**
+     * if contains child
+     * @param child
+     * @returns {boolean}
+     */
+    containsChild(child) {
+        return this.children.indexOf(child) !== -1;
+    }
+
+    /**
+     * if contains child
+     * @param child
+     * @returns {boolean}
+     */
+    hasChild(child) {
+        return this.containsChild(child);
     }
 
     /**
