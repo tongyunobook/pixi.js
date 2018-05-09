@@ -721,23 +721,23 @@ export default class InteractionManager extends EventEmitter
          */
         if (this.supportsPointerEvents)
         {
-            window.document.addEventListener('pointermove', this.onPointerMove, true);
-            this.interactionDOMElement.addEventListener('pointerdown', this.onPointerDown, true);
+            (window.document.$addEventListener||window.document.addEventListener)('pointermove', this.onPointerMove, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'pointerdown', this.onPointerDown, true);
             // pointerout is fired in addition to pointerup (for touch events) and pointercancel
             // we already handle those, so for the purposes of what we do in onPointerOut, we only
             // care about the pointerleave event
-            this.interactionDOMElement.addEventListener('pointerleave', this.onPointerOut, true);
-            this.interactionDOMElement.addEventListener('pointerover', this.onPointerOver, true);
-            window.addEventListener('pointercancel', this.onPointerCancel, true);
-            window.addEventListener('pointerup', this.onPointerUp, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'pointerleave', this.onPointerOut, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'pointerover', this.onPointerOver, true);
+            (window.$addEventListener||window.addEventListener)('pointercancel', this.onPointerCancel, true);
+            (window.$addEventListener||window.addEventListener)('pointerup', this.onPointerUp, true);
         }
         else
         {
-            window.document.addEventListener('mousemove', this.onPointerMove, true);
-            this.interactionDOMElement.addEventListener('mousedown', this.onPointerDown, true);
-            this.interactionDOMElement.addEventListener('mouseout', this.onPointerOut, true);
-            this.interactionDOMElement.addEventListener('mouseover', this.onPointerOver, true);
-            window.addEventListener('mouseup', this.onPointerUp, true);
+            (window.document.$addEventListener||window.document.addEventListener)('mousemove', this.onPointerMove, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'mousedown', this.onPointerDown, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'mouseout', this.onPointerOut, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'mouseover', this.onPointerOver, true);
+            (window.$addEventListener||window.addEventListener)('mouseup', this.onPointerUp, true);
         }
 
         // always look directly for touch events so that we can provide original data
@@ -745,10 +745,10 @@ export default class InteractionManager extends EventEmitter
         // PointerEvents whenever available
         if (this.supportsTouchEvents)
         {
-            this.interactionDOMElement.addEventListener('touchstart', this.onPointerDown, true);
-            this.interactionDOMElement.addEventListener('touchcancel', this.onPointerCancel, true);
-            this.interactionDOMElement.addEventListener('touchend', this.onPointerUp, true);
-            this.interactionDOMElement.addEventListener('touchmove', this.onPointerMove, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'touchstart', this.onPointerDown, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'touchcancel', this.onPointerCancel, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'touchend', this.onPointerUp, true);
+            (this.interactionDOMElement.$addEventListener||this.interactionDOMElement.addEventListener).call(this.interactionDOMElement,'touchmove', this.onPointerMove, true);
         }
 
         this.eventsAdded = true;
@@ -780,28 +780,28 @@ export default class InteractionManager extends EventEmitter
 
         if (this.supportsPointerEvents)
         {
-            window.document.removeEventListener('pointermove', this.onPointerMove, true);
-            this.interactionDOMElement.removeEventListener('pointerdown', this.onPointerDown, true);
-            this.interactionDOMElement.removeEventListener('pointerleave', this.onPointerOut, true);
-            this.interactionDOMElement.removeEventListener('pointerover', this.onPointerOver, true);
-            window.removeEventListener('pointercancel', this.onPointerCancel, true);
-            window.removeEventListener('pointerup', this.onPointerUp, true);
+            (window.document.$removeEventListener||window.document.removeEventListener)('pointermove', this.onPointerMove, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'pointerdown', this.onPointerDown, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'pointerleave', this.onPointerOut, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'pointerover', this.onPointerOver, true);
+            (window.$removeEventListener||window.removeEventListener)('pointercancel', this.onPointerCancel, true);
+            (window.$removeEventListener||window.removeEventListener)('pointerup', this.onPointerUp, true);
         }
         else
         {
-            window.document.removeEventListener('mousemove', this.onPointerMove, true);
-            this.interactionDOMElement.removeEventListener('mousedown', this.onPointerDown, true);
-            this.interactionDOMElement.removeEventListener('mouseout', this.onPointerOut, true);
-            this.interactionDOMElement.removeEventListener('mouseover', this.onPointerOver, true);
-            window.removeEventListener('mouseup', this.onPointerUp, true);
+            (window.document.$removeEventListener||window.document.removeEventListener)('mousemove', this.onPointerMove, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'mousedown', this.onPointerDown, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'mouseout', this.onPointerOut, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'mouseover', this.onPointerOver, true);
+            (window.$removeEventListener||window.removeEventListener)('mouseup', this.onPointerUp, true);
         }
 
         if (this.supportsTouchEvents)
         {
-            this.interactionDOMElement.removeEventListener('touchstart', this.onPointerDown, true);
-            this.interactionDOMElement.removeEventListener('touchcancel', this.onPointerCancel, true);
-            this.interactionDOMElement.removeEventListener('touchend', this.onPointerUp, true);
-            this.interactionDOMElement.removeEventListener('touchmove', this.onPointerMove, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'touchstart', this.onPointerDown, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'touchcancel', this.onPointerCancel, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'touchend', this.onPointerUp, true);
+            (this.interactionDOMElement.$removeEventListener||this.interactionDOMElement.removeEventListener).call(this.interactionDOMElement,'touchmove', this.onPointerMove, true);
         }
 
         this.interactionDOMElement = null;

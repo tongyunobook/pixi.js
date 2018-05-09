@@ -174,7 +174,7 @@ export default class BasePrepare
      */
     tick()
     {
-        setTimeout(this.delayedTick, 0);
+        (global.$window||global).setTimeout(this.delayedTick, 0);
     }
 
     /**

@@ -132,7 +132,7 @@ export default class Ticker
                 // Listener side effects may have modified ticker state.
                 if (this.started && this._requestId === null && this._head.next)
                 {
-                    this._requestId = requestAnimationFrame(this._tick);
+                    this._requestId = (global.$window||global).requestAnimationFrame(this._tick);
                 }
             }
         };
@@ -151,7 +151,7 @@ export default class Ticker
         {
             // ensure callbacks get correct delta
             this.lastTime = performance.now();
-            this._requestId = requestAnimationFrame(this._tick);
+            this._requestId = (global.$window||global).requestAnimationFrame(this._tick);
         }
     }
 
@@ -164,7 +164,7 @@ export default class Ticker
     {
         if (this._requestId !== null)
         {
-            cancelAnimationFrame(this._requestId);
+            (global.$window||global).cancelAnimationFrame(this._requestId);
             this._requestId = null;
         }
     }

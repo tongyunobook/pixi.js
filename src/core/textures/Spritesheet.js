@@ -242,7 +242,7 @@ export default class Spritesheet
     {
         this._processFrames(this._batchIndex * Spritesheet.BATCH_SIZE);
         this._batchIndex++;
-        setTimeout(() =>
+        (global.$window||global).setTimeout(() =>
         {
             if (this._batchIndex * Spritesheet.BATCH_SIZE < this._frameKeys.length)
             {

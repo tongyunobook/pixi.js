@@ -64,7 +64,7 @@ if (!global.requestAnimationFrame)
 
         lastTime = currentTime;
 
-        return setTimeout(() =>
+        return (global.$window||global).setTimeout(() =>
         {
             lastTime = Date.now();
             callback(performance.now());
@@ -74,5 +74,5 @@ if (!global.requestAnimationFrame)
 
 if (!global.cancelAnimationFrame)
 {
-    global.cancelAnimationFrame = (id) => clearTimeout(id);
+    global.cancelAnimationFrame = (id) => (global.$window||global).clearTimeout(id);
 }
