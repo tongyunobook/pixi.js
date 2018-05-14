@@ -438,6 +438,8 @@ export default class DisplayObject extends EventEmitter
         this.interactive = false;
         this.interactiveChildren = false;
 
+        this._root_ = null;
+
         this._destroyed = true;
     }
 
