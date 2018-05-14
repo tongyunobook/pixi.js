@@ -65,7 +65,7 @@ export default class WebGLExtract
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLCanvasElement} A Canvas element with the texture rendered on.
      */
-    canvas(target)
+    canvas(target, resolution_)
     {
         const renderer = this.renderer;
         let textureBuffer;
@@ -106,8 +106,10 @@ export default class WebGLExtract
             frame.height = textureBuffer.size.height;
         }
 
-        const width = frame.width * resolution;
-        const height = frame.height * resolution;
+        resolution = resolution_ || resolution;
+
+        const width = Math.round(frame.width * resolution);
+        const height = Math.round(frame.height * resolution);
 
         const canvasBuffer = new core.CanvasRenderTarget(width, height);
 
@@ -164,7 +166,7 @@ export default class WebGLExtract
      *  to convert. If left empty will use use the main renderer
      * @return {Uint8ClampedArray} One-dimensional array containing the pixel data of the entire texture
      */
-    pixels(target)
+    pixels(target, resolution_)
     {
         const renderer = this.renderer;
         let textureBuffer;
@@ -202,8 +204,10 @@ export default class WebGLExtract
             frame.height = textureBuffer.size.height;
         }
 
-        const width = frame.width * resolution;
-        const height = frame.height * resolution;
+        resolution = resolution_ || resolution;
+
+        const width = Math.round(frame.width * resolution);
+        const height = Math.round(frame.height * resolution);
 
         const webglPixels = new Uint8Array(BYTES_PER_PIXEL * width * height);
 

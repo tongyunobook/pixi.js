@@ -64,7 +64,7 @@ export default class CanvasExtract
      *  to convert. If left empty will use use the main renderer
      * @return {HTMLCanvasElement} A Canvas element with the texture rendered on.
      */
-    canvas(target)
+    canvas(target, resolution_)
     {
         const renderer = this.renderer;
         let context;
@@ -99,8 +99,10 @@ export default class CanvasExtract
             frame.height = this.renderer.height;
         }
 
-        const width = frame.width * resolution;
-        const height = frame.height * resolution;
+        resolution = resolution_ || resolution;
+
+        const width = Math.round(frame.width * resolution);
+        const height = Math.round(frame.height * resolution);
 
         const canvasBuffer = new core.CanvasRenderTarget(width, height);
         const canvasData = context.getImageData(frame.x * resolution, frame.y * resolution, width, height);
@@ -119,7 +121,7 @@ export default class CanvasExtract
      *  to convert. If left empty will use use the main renderer
      * @return {Uint8ClampedArray} One-dimensional array containing the pixel data of the entire texture
      */
-    pixels(target)
+    pixels(target, resolution_)
     {
         const renderer = this.renderer;
         let context;
@@ -154,7 +156,12 @@ export default class CanvasExtract
             frame.height = renderer.height;
         }
 
-        return context.getImageData(0, 0, frame.width * resolution, frame.height * resolution).data;
+        resolution = resolution_ || resolution;
+
+        const width = Math.round(frame.width * resolution);
+        const height = Math.round(frame.height * resolution);
+
+        return context.getImageData(0, 0, width, height).data;
     }
 
     /**
