@@ -124,4 +124,9 @@ export default class ObservablePoint
         this.x = xa;
         this.y = ya;
     }
+
+    destroy() {
+        this.cb = null;
+        this.scope = null;
+    }
 }

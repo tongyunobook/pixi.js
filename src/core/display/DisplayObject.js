@@ -425,7 +425,11 @@ export default class DisplayObject extends EventEmitter
         {
             this.parent.removeChild(this);
         }
-        this.transform = null;
+
+        if(this.transform) {
+            this.transform.destroy();
+            this.transform = null;
+        }
 
         this.parent = null;
 

@@ -176,4 +176,23 @@ export default class TransformStatic extends TransformBase
         this._rotation = value;
         this.updateSkew();
     }
+
+    destroy() {
+        if(this.position) {
+            this.position.destroy();
+            this.position = null;
+        }
+        if(this.scale) {
+            this.scale.destroy();
+            this.scale = null;
+        }
+        if(this.pivot) {
+            this.pivot.destroy();
+            this.pivot = null;
+        }
+        if(this.skew) {
+            this.skew.destroy();
+            this.skew = null;
+        }
+    }
 }

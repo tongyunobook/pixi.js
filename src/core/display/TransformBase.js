@@ -61,6 +61,10 @@ export default class TransformBase
         this._worldID ++;
     }
 
+    destroy() {
+
+    }
+
 }
 
 /**
