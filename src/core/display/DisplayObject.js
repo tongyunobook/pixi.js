@@ -761,7 +761,7 @@ export default class DisplayObject extends EventEmitter
 
         if ('function' === typeof listeners.fn) {
             if (listeners.once) this.removeListener(event, listeners.fn, undefined, true);
-            if (a1 !== undefined) {
+            if (a1 !== undefined && a1 !== null) {
                 for (i = 1, args = []; i < len; i++) {
                     args[i - 1] = arguments[i];
                 }
@@ -782,7 +782,7 @@ export default class DisplayObject extends EventEmitter
                 if (a1 && a1.stopImmediate === true) {
                     break;
                 }
-                if (a1 !== undefined) {
+                if (a1 !== undefined && a1 !== null) {
                     for (j = 1, args = []; j < len; j++) {
                         args[j - 1] = arguments[j];
                     }
