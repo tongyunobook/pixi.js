@@ -119,7 +119,7 @@ export default class AccessibilityManager
         this.isMobileAccessabillity = false;
 
         // let listen for tab.. once pressed we can fire up and show the accessibility layer
-        (window.$addEventListener||window.addEventListener)('keydown', this._onKeyDown, false);
+        window.addEventListener('keydown', this._onKeyDown, false);
     }
 
     /**
@@ -164,8 +164,8 @@ export default class AccessibilityManager
 
         this.isActive = true;
 
-        (window.document.$addEventListener||window.document.addEventListener)('mousemove', this._onMouseMove, true);
-        (window.$removeEventListener||window.removeEventListener)('keydown', this._onKeyDown, false);
+        document.addEventListener('mousemove', this._onMouseMove, true);
+        window.removeEventListener('keydown', this._onKeyDown, false);
 
         this.renderer.on('postrender', this.update, this);
 
@@ -190,8 +190,8 @@ export default class AccessibilityManager
 
         this.isActive = false;
 
-        (window.document.$removeEventListener||window.document.removeEventListener)('mousemove', this._onMouseMove);
-        (window.$addEventListener||window.addEventListener)('keydown', this._onKeyDown, false);
+        document.removeEventListener('mousemove', this._onMouseMove);
+        window.addEventListener('keydown', this._onKeyDown, false);
 
         this.renderer.off('postrender', this.update);
 
@@ -473,8 +473,8 @@ export default class AccessibilityManager
             this.children[i].div = null;
         }
 
-        (window.document.$removeEventListener||window.document.removeEventListener)('mousemove', this._onMouseMove);
-        (window.$removeEventListener||window.removeEventListener)('keydown', this._onKeyDown);
+        document.removeEventListener('mousemove', this._onMouseMove);
+        window.removeEventListener('keydown', this._onKeyDown);
 
         this.pool = null;
         this.children = null;
