@@ -215,7 +215,7 @@ export default class Ticker
      * @returns {*}
      */
     has(fn) {
-        console.error('TODO: 4.7.3 ticker方法已经重构，需要重新实现has方法！');
+        console.log('TODO: 4.7.3 ticker方法已经重构，需要重新实现has方法！');
     }
 
     /**
