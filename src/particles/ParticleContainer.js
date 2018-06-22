@@ -239,6 +239,9 @@ export default class ParticleContainer extends core.Container
      */
     onChildrenChange(smallestChildIndex)
     {
+        if (!this._bufferUpdateIDs) {
+            return;
+        }
         const bufferIndex = Math.floor(smallestChildIndex / this._batchSize);
 
         while (this._bufferUpdateIDs.length < bufferIndex)
