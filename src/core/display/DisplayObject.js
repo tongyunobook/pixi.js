@@ -905,12 +905,12 @@ export default class DisplayObject extends EventEmitter
      */
     get position()
     {
-        return this.transform ? this.transform.position : null;
+        return this.transform ? this.transform.position : new PIXI.ObservablePoint();
     }
 
     set position(value) // eslint-disable-line require-jsdoc
     {
-        if (this.transform) this.transform.position.copy(value);
+        this.transform.position.copy(value);
     }
 
     /**
