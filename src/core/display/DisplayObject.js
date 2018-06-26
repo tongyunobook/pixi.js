@@ -167,6 +167,7 @@ export default class DisplayObject extends EventEmitter
      */
     updateTransform()
     {
+        if (!this.transform) return;
         this.transform.updateTransform(this.parent.transform);
         // multiply the alphas..
         this.worldAlpha = this.alpha * this.parent.worldAlpha;
@@ -183,11 +184,11 @@ export default class DisplayObject extends EventEmitter
         if (this.parent)
         {
             this.parent._recursivePostUpdateTransform();
-            this.transform.updateTransform(this.parent.transform);
+            if (this.transform) this.transform.updateTransform(this.parent.transform);
         }
         else
         {
-            this.transform.updateTransform(this._tempDisplayObjectParent.transform);
+            if (this.transform) this.transform.updateTransform(this._tempDisplayObjectParent.transform);
         }
     }
 
@@ -301,7 +302,7 @@ export default class DisplayObject extends EventEmitter
         }
 
         // don't need to update the lot
-        return this.worldTransform.apply(position, point);
+        return this.worldTransform ? this.worldTransform.apply(position, point) : null;
     }
 
     /**
@@ -341,7 +342,7 @@ export default class DisplayObject extends EventEmitter
         }
 
         // simply apply the matrix..
-        return this.worldTransform.applyInverse(position, point);
+        return this.worldTransform ? this.worldTransform.applyInverse(position, point) : null;
     }
 
     /**
@@ -855,7 +856,7 @@ export default class DisplayObject extends EventEmitter
 
     set x(value) // eslint-disable-line require-jsdoc
     {
-        this.transform.position.x = value;
+        if(this.transform) this.transform.position.x = value;
     }
 
     /**
@@ -871,7 +872,7 @@ export default class DisplayObject extends EventEmitter
 
     set y(value) // eslint-disable-line require-jsdoc
     {
-        this.transform.position.y = value;
+        if(this.transform) this.transform.position.y = value;
     }
 
     /**
@@ -882,7 +883,7 @@ export default class DisplayObject extends EventEmitter
      */
     get worldTransform()
     {
-        return this.transform.worldTransform;
+        return this.transform ? this.transform.worldTransform : null;
     }
 
     /**
@@ -904,12 +905,12 @@ export default class DisplayObject extends EventEmitter
      */
     get position()
     {
-        return this.transform.position;
+        return this.transform ? this.transform.position : null;
     }
 
     set position(value) // eslint-disable-line require-jsdoc
     {
-        this.transform.position.copy(value);
+        if (this.transform) this.transform.position.copy(value);
     }
 
     /**
@@ -967,12 +968,12 @@ export default class DisplayObject extends EventEmitter
      */
     get rotation()
     {
-        return this.transform.rotation;
+        return this.transform ? this.transform.rotation : null;
     }
 
     set rotation(value) // eslint-disable-line require-jsdoc
     {
-        this.transform.rotation = value;
+        if(this.transform) this.transform.rotation = value;
     }
 
     /**
