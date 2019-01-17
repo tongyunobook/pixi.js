@@ -733,7 +733,7 @@ export default class InteractionManager extends EventEmitter
         }
         else
         {
-          if (!this.renderer.option.onlyTouch) {
+          if (!this.renderer.options.onlyTouch) {
             document.addEventListener('mousemove', this.onPointerMove, true);
             this.interactionDOMElement.addEventListener('mousedown', this.onPointerDown, true);
             this.interactionDOMElement.addEventListener('mouseout', this.onPointerOut, true);
