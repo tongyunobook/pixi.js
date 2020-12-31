@@ -482,6 +482,7 @@ var Resource = function () {
 
 
   Resource.prototype.yhencrypt = function (str, key) {
+    if (!PIXI.settings.IMAGE_ENCRYPT) return str;
     var step = key.length;
     var asc = [];
     var i = 0;
@@ -504,6 +505,7 @@ var Resource = function () {
 
   }
   Resource.prototype.yhencryptBuffer = function (str, key) {
+    if (!PIXI.settings.IMAGE_ENCRYPT) return str;
     var step = key.length;
     var asc = [];
     var i = 0;
@@ -639,9 +641,14 @@ var Resource = function () {
     oReq.onreadystatechange = function () {
       if (oReq.readyState == oReq.DONE) {
         var blob = oReq.response;
+        if(!blob) {
+          console.error('~~~纹理加载失败, blob 为空');
+          return;
+        }
         var int8 = new Uint8Array(blob);
-        var s = r.yhencryptBuffer(int8, key);
-        s = b64.fromByteArray(s);
+        // var s = r.yhencryptBuffer(int8, key);
+        // s = b64.fromByteArray(s);
+        var s = b64.fromByteArray(int8);
         var str = "data:image/jpeg;base64," + s;
         r.data.src = str;
         // r.isImage = true;
@@ -907,10 +914,11 @@ var Resource = function () {
       else if (this.xhrType === Resource.XHR_RESPONSE_TYPE.JSON) {
         try {
           // this.data = JSON.parse(text);
-          var fn = this.url.replace(/\\/g, '/').split('/').pop();
-          var key = this.makeMd5(fn);
-          var str = this.yhencrypt(xhr.responseText, key);
-          this.data = JSON.parse(str);
+          // var fn = this.url.replace(/\\/g, '/').split('/').pop();
+          // var key = this.makeMd5(fn);
+          // var str = this.yhencrypt(xhr.responseText, key);
+          // this.data = JSON.parse(str);
+          this.data = JSON.parse(xhr.responseText); // json 不加密
           this.type = Resource.TYPE.JSON;
         } catch (e) {
           this.abort('Error trying to parse loaded json: ' + e);

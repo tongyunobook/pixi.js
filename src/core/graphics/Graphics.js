@@ -292,6 +292,10 @@ export default class Graphics extends Container
      */
     lineTo(x, y)
     {
+      if (!this.currentPath) {
+        console.warn('需要先调用moveTo,否则currentPath为空,此处默认调用moveTo当前点');
+        this.moveTo(x, y);
+      }
         this.currentPath.shape.points.push(x, y);
         this.dirty++;
 

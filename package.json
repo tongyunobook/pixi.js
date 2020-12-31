@@ -31,7 +31,7 @@
     "renders": "electron scripts/renders",
     "precoverage": "rimraf coverage",
     "coverage": "npm run unit-test -- -c dist/pixi.js -s -h",
-    "lint": "eslint scripts src test --max-warnings 0",
+    "lint": "eslint scripts src test --max-warnings 10000000000",
     "lintfix": "npm run lint --fix",
     "prebuild": "npm run lint",
     "build": "npm run dist",
