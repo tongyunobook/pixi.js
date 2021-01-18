@@ -992,7 +992,7 @@ export default class InteractionManager extends EventEmitter
      * @param {boolean} [interactive] - Whether the displayObject is interactive
      * @return {boolean} returns true if the displayObject hit the point
      */
-    processInteractive(interactionEvent, displayObject, func, hitTest, interactive, touchData)
+    processInteractive(interactionEvent, displayObject, func, hitTest, interactive, touchData, checkMask)
     {
         if (!displayObject || !displayObject.visible)
         {
@@ -1046,7 +1046,7 @@ export default class InteractionManager extends EventEmitter
         {
             if (hitTest)
             {
-                if (!displayObject._mask.containsPoint(point))
+                if (!checkMask && !displayObject._mask.containsPoint(point))
                 {
                     hitTest = false;
                     hitTestChildren = false;
@@ -1066,7 +1066,7 @@ export default class InteractionManager extends EventEmitter
                 const child = children[i];
 
                 // time to get recursive.. if this function will return if something is hit..
-                const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent, touchData);
+                const childHit = this.processInteractive(interactionEvent, child, func, hitTest, interactiveParent, touchData, checkMask);
 
                 if (childHit)
                 {
@@ -1157,7 +1157,13 @@ export default class InteractionManager extends EventEmitter
 
         if (this.autoPreventDefault && events[0].isNormalized)
         {
-            originalEvent.preventDefault();
+            // originalEvent.preventDefault();
+            const cancelable = originalEvent.cancelable || !('cancelable' in originalEvent);
+
+            if (cancelable)
+            {
+                originalEvent.preventDefault();
+            }
         }
 
         const eventLen = events.length;
@@ -1242,8 +1248,9 @@ export default class InteractionManager extends EventEmitter
      * @param {PointerEvent} originalEvent - The DOM event of a pointer button being released
      * @param {boolean} cancelled - true if the pointer is cancelled
      * @param {Function} func - Function passed to {@link processInteractive}
+     * @param {boolean} checkMask pointUp时，遮罩下检测是否触发pointeroutside
      */
-    onPointerComplete(originalEvent, cancelled, func)
+    onPointerComplete(originalEvent, cancelled, func, checkMask)
     {
         const events = this.normalizeToPointerData(originalEvent);
 
@@ -1264,7 +1271,7 @@ export default class InteractionManager extends EventEmitter
             interactionEvent.data.originalEvent = originalEvent;
 
             // perform hit testing for events targeting our canvas or cancel events
-            this.processInteractive(interactionEvent, this.renderer._lastObjectRendered, func, cancelled || !eventAppend);
+            this.processInteractive(interactionEvent, this.renderer._lastObjectRendered, func, cancelled || !eventAppend, null, null, checkMask);
 
             this.emit(cancelled ? 'pointercancel' : `pointerup${eventAppend}`, interactionEvent);
 
@@ -1293,7 +1300,7 @@ export default class InteractionManager extends EventEmitter
         // if we support touch events, then only use those for touch events, not pointer events
         if (this.supportsTouchEvents && event.pointerType === 'touch') return;
 
-        this.onPointerComplete(event, true, this.processPointerCancel);
+        this.onPointerComplete(event, true, this.processPointerCancel, true);
     }
 
     /**
@@ -1332,7 +1339,7 @@ export default class InteractionManager extends EventEmitter
         // if we support touch events, then only use those for touch events, not pointer events
         if (this.supportsTouchEvents && event.pointerType === 'touch') return;
 
-        this.onPointerComplete(event, false, this.processPointerUp);
+        this.onPointerComplete(event, false, this.processPointerUp, true);
     }
 
     /**
