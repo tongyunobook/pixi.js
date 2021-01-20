@@ -632,8 +632,13 @@ var Resource = function () {
     }
     // this.isImage = true;
     var oReq = new XMLHttpRequest();
-    var fn = this.url.replace(/\\/g, '/').split('/').pop();
-    var key = this.makeMd5(fn);
+    // var fn = this.url.replace(/\\/g, '/').split('/').pop();
+    // var key = this.makeMd5(fn);
+    if(PIXI.settings.IMAGE_SCALE && PIXI.settings.IMAGE_SCALE.length) {
+      var url = this.url;
+      var ind = url.replace('\\', '/').lastIndexOf('/');
+      this.url = url.substring(0, ind + 1) + PIXI.settings.IMAGE_SCALE + url.substring(ind + 1);
+    }
     // var key = this.makeMd5(this.url.replace(/\\/g, '/'));
     oReq.open("GET", this.url, true);
     oReq.responseType = "arraybuffer";
