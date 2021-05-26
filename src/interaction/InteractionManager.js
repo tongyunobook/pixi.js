@@ -935,7 +935,7 @@ export default class InteractionManager extends EventEmitter
         if (!eventData.stopped)
         {
             eventData.currentTarget = displayObject;
-            eventData.target = displayObject;
+            // eventData.target = displayObject; // 打开会导致mouseover上触发mouseout
             eventData.type = eventString;
 
             displayObject.emit(eventString, eventData);
@@ -1072,6 +1072,7 @@ export default class InteractionManager extends EventEmitter
                 {
                     // its a good idea to check if a child has lost its parent.
                     // this means it has been removed whilst looping so its best
+                    // 被移除舞台，不继续检测
                     if (!child.parent)
                     {
                         continue;
@@ -1079,6 +1080,7 @@ export default class InteractionManager extends EventEmitter
 
                     // we no longer need to hit test any more objects in this container as we we
                     // now know the parent has been hit
+                    // 子项中一个检测到，其他同级不需要再检测
                     interactiveParent = false;
 
                     // If the child is interactive , that means that the object hit was actually
@@ -1088,7 +1090,7 @@ export default class InteractionManager extends EventEmitter
 
                     if (childHit)
                     {
-                        if (interactionEvent.target)
+                        if (interactionEvent.target) // 已经检测到目标了
                         {
                             hitTest = false;
                         }
